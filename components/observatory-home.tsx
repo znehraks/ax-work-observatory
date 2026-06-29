@@ -490,7 +490,7 @@ function AgenticPipelineFilm({ isPrinting }: { isPrinting: boolean }) {
         <video
           ref={videoRef}
           className="pipeline-film-video"
-          src="/media/agentic-task-automation.mp4"
+          src="/media/agentic-task-automation.mp4?v=20260630-pipeline-trace"
           autoPlay
           loop
           muted

@@ -108,12 +108,12 @@ const buildPipelineSamples = () => {
   let previous: Point | null = null;
 
   for (const segment of pipelineSegments) {
-    for (let index = 0; index <= 72; index += 1) {
+    for (let index = 0; index <= 160; index += 1) {
       if (samples.length > 0 && index === 0) {
         continue;
       }
 
-      const point = cubicPoint(segment, index / 72);
+      const point = cubicPoint(segment, index / 160);
 
       if (previous) {
         totalLength += Math.hypot(point.x - previous.x, point.y - previous.y);
@@ -146,6 +146,14 @@ const getPointOnPipeline = (progress: number): Point => {
     x: previous.x + (next.x - previous.x) * mix,
     y: previous.y + (next.y - previous.y) * mix,
   };
+};
+
+const getPipelinePoints = (progress: number) => {
+  const targetLength = Math.max(0, Math.min(1, progress)) * pipelineTrack.totalLength;
+  const visibleSamples = pipelineTrack.samples.filter((sample) => sample.length <= targetLength);
+  const point = getPointOnPipeline(progress);
+
+  return [...visibleSamples, point].map((sample) => `${sample.x.toFixed(2)},${sample.y.toFixed(2)}`).join(" ");
 };
 
 const visibleOutsideRange = (progress: number, start: number, end: number, fade = 0.035) => {
@@ -298,41 +306,35 @@ const StepNode = ({ step, index }: { step: (typeof steps)[number]; index: number
   );
 };
 
-const Packet = () => {
+const PipelineTrace = () => {
   const frame = useCurrentFrame();
-  const progress = interpolate(frame, [12, 154], [0, 1], {
+  const lineProgress = interpolate(frame, [12, 154], [0, 1], {
     ...clamp,
     easing: Easing.inOut(Easing.quad),
   });
-  const point = getPointOnPipeline(progress);
+  const point = getPointOnPipeline(lineProgress);
   const baseOpacity = interpolate(frame, [0, 16, 150, 166], [0, 0.86, 0.86, 0], clamp);
   const cardMask = Math.min(
-    visibleOutsideRange(progress, 0.14, 0.32),
-    visibleOutsideRange(progress, 0.5, 0.68),
-    visibleOutsideRange(progress, 0.82, 0.98),
+    visibleOutsideRange(lineProgress, 0.14, 0.32),
+    visibleOutsideRange(lineProgress, 0.5, 0.68),
+    visibleOutsideRange(lineProgress, 0.82, 0.98),
   );
   const opacity = baseOpacity * cardMask;
   const scale = interpolate(frame % 24, [0, 12, 24], [0.9, 1.08, 0.9]);
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        left: point.x,
-        top: point.y,
-        zIndex: 2,
-        width: 26,
-        height: 26,
-        marginLeft: -13,
-        marginTop: -13,
-        border: `2.5px solid ${ink}`,
-        borderRadius: 999,
-        background: red,
-        opacity,
-        transform: `scale(${scale})`,
-        boxShadow: "0 0 0 6px rgba(206, 13, 8, 0.1), 0 10px 24px rgba(0, 0, 0, 0.14)",
-      }}
-    />
+    <>
+      <polyline
+        points={getPipelinePoints(lineProgress)}
+        fill="none"
+        stroke={red}
+        strokeWidth="8"
+        strokeLinecap="square"
+        strokeLinejoin="round"
+      />
+      <circle cx={point.x} cy={point.y} r={13 * scale} fill={red} stroke={ink} strokeWidth="2.5" opacity={opacity} />
+      <circle cx={point.x} cy={point.y} r={20 * scale} fill="none" stroke="rgba(206, 13, 8, 0.1)" strokeWidth="6" opacity={opacity} />
+    </>
   );
 };
 
@@ -408,10 +410,6 @@ export const AgenticTaskAutomationPipeline = () => {
   const frame = useCurrentFrame();
   const progress = interpolate(frame, [0, 188], [0, 1], clamp);
   const headlineIn = useReveal(0, 22);
-  const lineProgress = interpolate(frame, [12, 154], [0, 1], {
-    ...clamp,
-    easing: Easing.inOut(Easing.quad),
-  });
 
   return (
     <AbsoluteFill
@@ -486,14 +484,7 @@ export const AgenticTaskAutomationPipeline = () => {
           strokeWidth="8"
           strokeLinecap="square"
         />
-        <path
-          d="M170 404 C260 310 335 303 425 332 S585 502 690 418 S875 274 1018 344"
-          fill="none"
-          stroke={red}
-          strokeWidth="8"
-          strokeLinecap="square"
-          strokeDasharray={`${lineProgress * pipelineTrack.totalLength} ${pipelineTrack.totalLength}`}
-        />
+        <PipelineTrace />
         <path
           d="M284 532 H996"
           stroke={ink}
@@ -503,7 +494,6 @@ export const AgenticTaskAutomationPipeline = () => {
         />
       </svg>
 
-      <Packet />
       {steps.map((step, index) => (
         <StepNode key={step.key} step={step} index={index} />
       ))}
