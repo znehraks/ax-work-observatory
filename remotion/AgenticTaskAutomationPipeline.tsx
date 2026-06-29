@@ -58,9 +58,110 @@ const audits = [
   { label: "Human review", x: 1000, from: 174 },
 ];
 
+type Point = {
+  x: number;
+  y: number;
+};
+
 const clamp = {
   extrapolateLeft: "clamp" as const,
   extrapolateRight: "clamp" as const,
+};
+
+const pipelineSegments = [
+  {
+    start: { x: 170, y: 404 },
+    controlA: { x: 260, y: 310 },
+    controlB: { x: 335, y: 303 },
+    end: { x: 425, y: 332 },
+  },
+  {
+    start: { x: 425, y: 332 },
+    controlA: { x: 515, y: 361 },
+    controlB: { x: 585, y: 502 },
+    end: { x: 690, y: 418 },
+  },
+  {
+    start: { x: 690, y: 418 },
+    controlA: { x: 795, y: 334 },
+    controlB: { x: 875, y: 274 },
+    end: { x: 1018, y: 344 },
+  },
+] as const;
+
+const cubicPoint = (segment: (typeof pipelineSegments)[number], t: number): Point => {
+  const inverse = 1 - t;
+  const a = inverse ** 3;
+  const b = 3 * inverse ** 2 * t;
+  const c = 3 * inverse * t ** 2;
+  const d = t ** 3;
+
+  return {
+    x: a * segment.start.x + b * segment.controlA.x + c * segment.controlB.x + d * segment.end.x,
+    y: a * segment.start.y + b * segment.controlA.y + c * segment.controlB.y + d * segment.end.y,
+  };
+};
+
+const buildPipelineSamples = () => {
+  const samples: Array<Point & { length: number }> = [];
+  let totalLength = 0;
+  let previous: Point | null = null;
+
+  for (const segment of pipelineSegments) {
+    for (let index = 0; index <= 72; index += 1) {
+      if (samples.length > 0 && index === 0) {
+        continue;
+      }
+
+      const point = cubicPoint(segment, index / 72);
+
+      if (previous) {
+        totalLength += Math.hypot(point.x - previous.x, point.y - previous.y);
+      }
+
+      samples.push({ ...point, length: totalLength });
+      previous = point;
+    }
+  }
+
+  return { samples, totalLength };
+};
+
+const pipelineTrack = buildPipelineSamples();
+
+const getPointOnPipeline = (progress: number): Point => {
+  const targetLength = Math.max(0, Math.min(1, progress)) * pipelineTrack.totalLength;
+  const nextIndex = pipelineTrack.samples.findIndex((sample) => sample.length >= targetLength);
+
+  if (nextIndex <= 0) {
+    return pipelineTrack.samples[0];
+  }
+
+  const previous = pipelineTrack.samples[nextIndex - 1];
+  const next = pipelineTrack.samples[nextIndex] ?? pipelineTrack.samples[pipelineTrack.samples.length - 1];
+  const span = Math.max(next.length - previous.length, 0.0001);
+  const mix = (targetLength - previous.length) / span;
+
+  return {
+    x: previous.x + (next.x - previous.x) * mix,
+    y: previous.y + (next.y - previous.y) * mix,
+  };
+};
+
+const visibleOutsideRange = (progress: number, start: number, end: number, fade = 0.035) => {
+  if (progress < start - fade || progress > end + fade) {
+    return 1;
+  }
+
+  if (progress < start) {
+    return Math.max(0, Math.min(1, (start - progress) / fade));
+  }
+
+  if (progress > end) {
+    return Math.max(0, Math.min(1, (progress - end) / fade));
+  }
+
+  return 0;
 };
 
 type BrandIcon = (typeof steps)[number]["icon"];
@@ -102,6 +203,7 @@ const StepNode = ({ step, index }: { step: (typeof steps)[number]; index: number
         position: "absolute",
         left: step.x,
         top: step.y,
+        zIndex: 3,
         width: 202,
         transform: `translate(-50%, -50%) translateY(${lift}px)`,
         opacity: reveal,
@@ -119,7 +221,7 @@ const StepNode = ({ step, index }: { step: (typeof steps)[number]; index: number
       <div
         style={{
           border: `2px solid ${ink}`,
-          background: "rgba(247, 241, 226, 0.92)",
+          background: "rgba(247, 241, 226, 0.98)",
           boxShadow: "0 16px 0 rgba(17, 17, 17, 0.08)",
         }}
       >
@@ -198,31 +300,37 @@ const StepNode = ({ step, index }: { step: (typeof steps)[number]; index: number
 
 const Packet = () => {
   const frame = useCurrentFrame();
-  const progress = interpolate(frame, [12, 54, 96, 142, 186], [0, 0.27, 0.55, 0.82, 1], {
+  const progress = interpolate(frame, [12, 154], [0, 1], {
     ...clamp,
     easing: Easing.inOut(Easing.quad),
   });
-  const x = interpolate(progress, [0, 0.27, 0.55, 0.82, 1], [170, 425, 690, 1018, 1105], clamp);
-  const y = interpolate(progress, [0, 0.27, 0.55, 0.82, 1], [404, 332, 418, 344, 580], clamp);
-  const opacity = interpolate(frame, [0, 16, 190, 206], [0, 1, 1, 0], clamp);
+  const point = getPointOnPipeline(progress);
+  const baseOpacity = interpolate(frame, [0, 16, 150, 166], [0, 0.86, 0.86, 0], clamp);
+  const cardMask = Math.min(
+    visibleOutsideRange(progress, 0.14, 0.32),
+    visibleOutsideRange(progress, 0.5, 0.68),
+    visibleOutsideRange(progress, 0.82, 0.98),
+  );
+  const opacity = baseOpacity * cardMask;
   const scale = interpolate(frame % 24, [0, 12, 24], [0.9, 1.08, 0.9]);
 
   return (
     <div
       style={{
         position: "absolute",
-        left: x,
-        top: y,
-        width: 34,
-        height: 34,
-        marginLeft: -17,
-        marginTop: -17,
-        border: `3px solid ${ink}`,
+        left: point.x,
+        top: point.y,
+        zIndex: 2,
+        width: 26,
+        height: 26,
+        marginLeft: -13,
+        marginTop: -13,
+        border: `2.5px solid ${ink}`,
         borderRadius: 999,
         background: red,
         opacity,
         transform: `scale(${scale})`,
-        boxShadow: "0 0 0 8px rgba(206, 13, 8, 0.13), 0 12px 30px rgba(0, 0, 0, 0.18)",
+        boxShadow: "0 0 0 6px rgba(206, 13, 8, 0.1), 0 10px 24px rgba(0, 0, 0, 0.14)",
       }}
     />
   );
@@ -300,7 +408,10 @@ export const AgenticTaskAutomationPipeline = () => {
   const frame = useCurrentFrame();
   const progress = interpolate(frame, [0, 188], [0, 1], clamp);
   const headlineIn = useReveal(0, 22);
-  const lineProgress = interpolate(frame, [10, 154], [0, 1], clamp);
+  const lineProgress = interpolate(frame, [12, 154], [0, 1], {
+    ...clamp,
+    easing: Easing.inOut(Easing.quad),
+  });
 
   return (
     <AbsoluteFill
@@ -381,7 +492,7 @@ export const AgenticTaskAutomationPipeline = () => {
           stroke={red}
           strokeWidth="8"
           strokeLinecap="square"
-          strokeDasharray={`${lineProgress * 1130} 1130`}
+          strokeDasharray={`${lineProgress * pipelineTrack.totalLength} ${pipelineTrack.totalLength}`}
         />
         <path
           d="M284 532 H996"
@@ -392,10 +503,10 @@ export const AgenticTaskAutomationPipeline = () => {
         />
       </svg>
 
+      <Packet />
       {steps.map((step, index) => (
         <StepNode key={step.key} step={step} index={index} />
       ))}
-      <Packet />
       <AuditLoop />
 
       <div
