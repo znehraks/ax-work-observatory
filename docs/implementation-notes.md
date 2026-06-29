@@ -26,6 +26,7 @@
 - `Agent Conversation Logger`는 Codex/Claude 세션, hook capture, normalize, archive 흐름을 보여준다.
 - `Data-to-Content Workflow`는 signal, collect, structure, generate, publish 흐름을 보여준다.
 - `24/7 Agentic Task Automation`은 Slack signal, Jira triage, Codex/OpenAI worker, GitHub Draft PR, CI/Human review return loop 흐름을 보여준다.
+- 각 영상의 단계 카드는 문자 약어 대신 단계 의미에 맞는 아이콘을 사용하고, `AIDLC Studio`에는 AWS 실행 환경 배지를 별도로 표시한다.
 - 공통 영상 소스는 `remotion/ResearchPipelineFilms.tsx`, task automation 전용 소스는 `remotion/AgenticTaskAutomationPipeline.tsx`다.
 - 출력 파일은 `public/media/aidlc-studio.mp4`, `public/media/agent-conversation-logger.mp4`, `public/media/data-to-content-workflow.mp4`, `public/media/agentic-task-automation.mp4`다.
 

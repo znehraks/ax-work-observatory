@@ -1,3 +1,21 @@
+import { faAws, faOpenai } from "@fortawesome/free-brands-svg-icons";
+import type { LucideIcon } from "lucide-react";
+import {
+  Archive,
+  Bot,
+  DatabaseZap,
+  FileJson,
+  FolderGit2,
+  GitBranch,
+  MessageSquareText,
+  MessagesSquare,
+  Network,
+  Newspaper,
+  PenLine,
+  Radar,
+  ShieldCheck,
+  Webhook,
+} from "lucide-react";
 import { AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 
 const ink = "#111111";
@@ -16,11 +34,35 @@ type Segment = {
   end: Point;
 };
 
+type BrandIcon = typeof faAws;
+
+type StepIcon =
+  | {
+      kind: "brand";
+      icon: BrandIcon;
+    }
+  | {
+      kind: "lucide";
+      icon: LucideIcon;
+    };
+
 type FilmStep = {
   label: string;
   caption: string;
   detail: string;
-  mark: string;
+  icon: StepIcon;
+  color?: string;
+  x: number;
+  y: number;
+  from: number;
+};
+
+type FilmBadge = {
+  label: string;
+  caption: string;
+  detail: string;
+  icon: BrandIcon;
+  color: string;
   x: number;
   y: number;
   from: number;
@@ -38,6 +80,7 @@ type FilmConfig = {
   segments: Segment[];
   masks: Array<[number, number]>;
   feedback: Array<{ label: string; x: number; y: number; from: number }>;
+  badges?: FilmBadge[];
 };
 
 const clamp = {
@@ -138,12 +181,35 @@ const useReveal = (from: number, duration = 18) => {
   });
 };
 
+const BrandIconMark = ({ icon, color, size = 58 }: { icon: BrandIcon; color: string; size?: number }) => {
+  const [width, height, , , pathData] = icon.icon;
+  const paths = Array.isArray(pathData) ? pathData : [pathData];
+
+  return (
+    <svg aria-hidden="true" viewBox={`0 0 ${width} ${height}`} style={{ width: size, height: size, display: "block" }}>
+      {paths.map((path, index) => (
+        <path key={`${icon.iconName}-${index}`} d={path} fill={color} />
+      ))}
+    </svg>
+  );
+};
+
+const StepIconMark = ({ icon, color }: { icon: StepIcon; color: string }) => {
+  if (icon.kind === "brand") {
+    return <BrandIconMark icon={icon.icon} color={color} size={58} />;
+  }
+
+  const Icon = icon.icon;
+  return <Icon aria-hidden="true" size={54} color={color} strokeWidth={2.25} />;
+};
+
 const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; accent: string }) => {
   const frame = useCurrentFrame();
   const reveal = useReveal(step.from);
   const pulse = interpolate(frame, [step.from, step.from + 16, step.from + 34], [0, 1, 0.18], clamp);
   const lift = interpolate(reveal, [0, 1], [22, 0]);
   const serial = String(index + 1).padStart(2, "0");
+  const iconColor = step.color ?? accent;
 
   return (
     <div
@@ -180,14 +246,9 @@ const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; acce
               placeItems: "center",
               borderRight: `2px solid ${ink}`,
               background: "rgba(255, 255, 255, 0.3)",
-              color: accent,
-              fontSize: 26,
-              fontWeight: 950,
-              fontFamily: "Arial Black, Helvetica, sans-serif",
-              lineHeight: 1,
             }}
           >
-            {step.mark}
+            <StepIconMark icon={step.icon} color={iconColor} />
           </div>
           <div style={{ padding: "12px 12px 10px" }}>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
@@ -232,6 +293,70 @@ const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; acce
               {step.detail}
             </p>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SideBadge = ({ badge }: { badge: FilmBadge }) => {
+  const reveal = useReveal(badge.from, 20);
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: badge.x,
+        top: badge.y,
+        zIndex: 2,
+        width: 192,
+        transform: `translate(-50%, -50%) translateY(${interpolate(reveal, [0, 1], [18, 0])}px)`,
+        opacity: reveal,
+        border: `2px solid ${ink}`,
+        background: "rgba(247, 241, 226, 0.96)",
+        boxShadow: "8px 8px 0 rgba(17, 17, 17, 0.1)",
+      }}
+    >
+      <div style={{ display: "grid", gridTemplateColumns: "76px 1fr", minHeight: 94 }}>
+        <div
+          style={{
+            display: "grid",
+            placeItems: "center",
+            borderRight: `2px solid ${ink}`,
+            background: "rgba(255, 255, 255, 0.24)",
+          }}
+        >
+          <BrandIconMark icon={badge.icon} color={badge.color} size={54} />
+        </div>
+        <div style={{ padding: "10px 10px 8px" }}>
+          <span
+            style={{
+              display: "block",
+              color: badge.color,
+              fontSize: 11,
+              fontWeight: 950,
+              textTransform: "uppercase",
+              lineHeight: 1,
+            }}
+          >
+            {badge.caption}
+          </span>
+          <strong
+            style={{
+              display: "block",
+              marginTop: 8,
+              color: ink,
+              fontSize: 22,
+              fontWeight: 950,
+              lineHeight: 0.9,
+              fontFamily: "Georgia, Times New Roman, serif",
+            }}
+          >
+            {badge.label}
+          </strong>
+          <p style={{ margin: "7px 0 0", color: "#27231e", fontSize: 12, fontWeight: 760, lineHeight: 1.12 }}>
+            {badge.detail}
+          </p>
         </div>
       </div>
     </div>
@@ -422,6 +547,9 @@ const ResearchPipelineFilm = ({ config }: { config: FilmConfig }) => {
       {config.steps.map((step, index) => (
         <StepNode key={step.label} step={step} index={index} accent={config.accent} />
       ))}
+      {config.badges?.map((badge) => (
+        <SideBadge key={badge.label} badge={badge} />
+      ))}
       <FeedbackLoop config={config} />
 
       <div
@@ -467,11 +595,51 @@ const aidlcConfig: FilmConfig = {
   accentSoft: "rgba(169, 199, 22, 0.18)",
   footer: "Prompt / files / agent run / approval gate / live timeline",
   steps: [
-    { label: "Prompt", caption: "Work intake", detail: "Brief and intent", mark: "P", x: 165, y: 402, from: 10 },
-    { label: "Files", caption: "Project state", detail: "Repo context and diffs", mark: "F", x: 365, y: 326, from: 38 },
-    { label: "Agent Run", caption: "Execution", detail: "Phase tracking", mark: "R", x: 590, y: 430, from: 72 },
-    { label: "Approval", caption: "Human gate", detail: "Review before merge", mark: "OK", x: 805, y: 330, from: 108 },
-    { label: "Timeline", caption: "Observable output", detail: "Artifacts and state", mark: "T", x: 1035, y: 406, from: 136 },
+    {
+      label: "Prompt",
+      caption: "Work intake",
+      detail: "Brief and intent",
+      icon: { kind: "lucide", icon: MessageSquareText },
+      x: 165,
+      y: 402,
+      from: 10,
+    },
+    {
+      label: "Files",
+      caption: "Project state",
+      detail: "Repo context and diffs",
+      icon: { kind: "lucide", icon: FolderGit2 },
+      x: 365,
+      y: 326,
+      from: 38,
+    },
+    {
+      label: "Agent Run",
+      caption: "Execution",
+      detail: "Phase tracking",
+      icon: { kind: "lucide", icon: Bot },
+      x: 590,
+      y: 430,
+      from: 72,
+    },
+    {
+      label: "Approval",
+      caption: "Human gate",
+      detail: "Review before merge",
+      icon: { kind: "lucide", icon: ShieldCheck },
+      x: 805,
+      y: 330,
+      from: 108,
+    },
+    {
+      label: "Timeline",
+      caption: "Observable output",
+      detail: "Artifacts and state",
+      icon: { kind: "lucide", icon: GitBranch },
+      x: 1035,
+      y: 406,
+      from: 136,
+    },
   ],
   segments: [
     { start: { x: 165, y: 402 }, controlA: { x: 260, y: 282 }, controlB: { x: 305, y: 280 }, end: { x: 365, y: 326 } },
@@ -491,6 +659,18 @@ const aidlcConfig: FilmConfig = {
     { label: "Diff review", x: 750, y: 82, from: 160 },
     { label: "Next run", x: 960, y: 38, from: 176 },
   ],
+  badges: [
+    {
+      label: "AWS",
+      caption: "Runtime sidecar",
+      detail: "Cloud deploy and infra lane",
+      icon: faAws,
+      color: "#ff9900",
+      x: 1100,
+      y: 232,
+      from: 56,
+    },
+  ],
 };
 
 const loggerConfig: FilmConfig = {
@@ -502,11 +682,52 @@ const loggerConfig: FilmConfig = {
   accentSoft: "rgba(23, 110, 130, 0.18)",
   footer: "Sessions / hooks / normalize / privacy gate / archive",
   steps: [
-    { label: "Codex", caption: "Session capture", detail: "Conversation events", mark: "C", x: 160, y: 340, from: 10 },
-    { label: "Claude", caption: "Second stream", detail: "Tool calls and traces", mark: "CL", x: 330, y: 462, from: 40 },
-    { label: "Hooks", caption: "Lifecycle", detail: "Run boundaries", mark: "H", x: 535, y: 342, from: 74 },
-    { label: "Normalize", caption: "Event grammar", detail: "JSONL-ready records", mark: "N", x: 748, y: 462, from: 106 },
-    { label: "Archive", caption: "Memory layer", detail: "Obsidian and viewer", mark: "A", x: 990, y: 342, from: 138 },
+    {
+      label: "Codex",
+      caption: "Session capture",
+      detail: "Conversation events",
+      icon: { kind: "brand", icon: faOpenai },
+      color: "#111111",
+      x: 160,
+      y: 340,
+      from: 10,
+    },
+    {
+      label: "Claude",
+      caption: "Second stream",
+      detail: "Tool calls and traces",
+      icon: { kind: "lucide", icon: MessagesSquare },
+      x: 330,
+      y: 462,
+      from: 40,
+    },
+    {
+      label: "Hooks",
+      caption: "Lifecycle",
+      detail: "Run boundaries",
+      icon: { kind: "lucide", icon: Webhook },
+      x: 535,
+      y: 342,
+      from: 74,
+    },
+    {
+      label: "Normalize",
+      caption: "Event grammar",
+      detail: "JSONL-ready records",
+      icon: { kind: "lucide", icon: FileJson },
+      x: 748,
+      y: 462,
+      from: 106,
+    },
+    {
+      label: "Archive",
+      caption: "Memory layer",
+      detail: "Obsidian and viewer",
+      icon: { kind: "lucide", icon: Archive },
+      x: 990,
+      y: 342,
+      from: 138,
+    },
   ],
   segments: [
     { start: { x: 160, y: 340 }, controlA: { x: 225, y: 395 }, controlB: { x: 258, y: 458 }, end: { x: 330, y: 462 } },
@@ -537,11 +758,51 @@ const contentConfig: FilmConfig = {
   accentSoft: "rgba(200, 139, 20, 0.2)",
   footer: "Signals / collect / structure / generate / publish queue",
   steps: [
-    { label: "Signals", caption: "Research input", detail: "Sources and saved notes", mark: "S", x: 160, y: 418, from: 10 },
-    { label: "Collect", caption: "Data capture", detail: "Context archive", mark: "C", x: 365, y: 336, from: 38 },
-    { label: "Structure", caption: "Meaning sieve", detail: "Sort into arguments", mark: "ST", x: 575, y: 438, from: 72 },
-    { label: "Generate", caption: "Synthesis desk", detail: "Brief and article draft", mark: "G", x: 790, y: 338, from: 106 },
-    { label: "Publish", caption: "Queue", detail: "Note and reuse score", mark: "P", x: 1015, y: 420, from: 138 },
+    {
+      label: "Signals",
+      caption: "Research input",
+      detail: "Sources and saved notes",
+      icon: { kind: "lucide", icon: Radar },
+      x: 160,
+      y: 418,
+      from: 10,
+    },
+    {
+      label: "Collect",
+      caption: "Data capture",
+      detail: "Context archive",
+      icon: { kind: "lucide", icon: DatabaseZap },
+      x: 365,
+      y: 336,
+      from: 38,
+    },
+    {
+      label: "Structure",
+      caption: "Meaning sieve",
+      detail: "Sort into arguments",
+      icon: { kind: "lucide", icon: Network },
+      x: 575,
+      y: 438,
+      from: 72,
+    },
+    {
+      label: "Generate",
+      caption: "Synthesis desk",
+      detail: "Brief and article draft",
+      icon: { kind: "lucide", icon: PenLine },
+      x: 790,
+      y: 338,
+      from: 106,
+    },
+    {
+      label: "Publish",
+      caption: "Queue",
+      detail: "Note and reuse score",
+      icon: { kind: "lucide", icon: Newspaper },
+      x: 1015,
+      y: 420,
+      from: 138,
+    },
   ],
   segments: [
     { start: { x: 160, y: 418 }, controlA: { x: 235, y: 330 }, controlB: { x: 300, y: 306 }, end: { x: 365, y: 336 } },

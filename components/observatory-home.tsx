@@ -35,19 +35,19 @@ const dispatchFilms: Record<
   }
 > = {
   "aidlc-studio": {
-    src: "/media/aidlc-studio.mp4?v=20260630-research-films",
+    src: "/media/aidlc-studio.mp4?v=20260630-icon-cards",
     labels: ["Prompt", "Files", "Agent Run", "Approval", "Timeline"],
   },
   "agent-conversation-logger": {
-    src: "/media/agent-conversation-logger.mp4?v=20260630-research-films",
+    src: "/media/agent-conversation-logger.mp4?v=20260630-icon-cards",
     labels: ["Codex", "Claude", "Hooks", "Normalize", "Archive"],
   },
   "data-to-content-workflow": {
-    src: "/media/data-to-content-workflow.mp4?v=20260630-research-films",
+    src: "/media/data-to-content-workflow.mp4?v=20260630-icon-cards",
     labels: ["Signals", "Collect", "Structure", "Generate", "Publish"],
   },
   "agentic-task-automation": {
-    src: "/media/agentic-task-automation.mp4?v=20260630-research-films",
+    src: "/media/agentic-task-automation.mp4?v=20260630-icon-cards",
     labels: ["Slack Signal", "Jira Triage", "Codex Worker", "GitHub PR"],
   },
 };

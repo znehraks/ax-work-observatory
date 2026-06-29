@@ -81,6 +81,7 @@ intake -> context -> engine -> gate -> artifact -> feedback
 - `Agent Run`: 에이전트 실행과 단계 진행.
 - `Approval`: 사람이 확인하는 승인 게이트.
 - `Timeline`: 실행 로그와 리뷰 가능한 화면.
+- `AWS`: 클라우드 실행과 배포 환경을 나타내는 별도 side badge.
 
 `Agent Conversation Logger`
 
