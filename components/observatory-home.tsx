@@ -5,7 +5,6 @@ import type { CSSProperties } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Pause, Play, X } from "lucide-react";
 import { flowNodes, researchTracks } from "@/content/research";
-import { ResearchMachineScene } from "@/components/research-machine-scene";
 import type { ResearchTrack } from "@/content/research";
 
 const issueCards = [
@@ -538,6 +537,11 @@ function MachineDetailOverlay({
       <motion.section
         className="machine-detail"
         aria-label={`${activeTrack.title} machine mapping`}
+        style={
+          {
+            "--workflow-accent": activeTrack.accent,
+          } as CSSProperties
+        }
         initial={{ opacity: 0, y: 18, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 12, scale: 0.98 }}
@@ -547,21 +551,20 @@ function MachineDetailOverlay({
         <button className="machine-detail-close" type="button" onClick={onClose} aria-label="Close detail view">
           <X size={17} />
         </button>
-        <div
-          className="machine-detail-stage"
-          style={
-            {
-              "--workflow-accent": activeTrack.accent,
-            } as CSSProperties
-          }
-        >
-          <ResearchMachineScene activeTrack={activeTrack} isPrinting={isPrinting} />
+        <div className="machine-detail-stage">
+          <div className="detail-note-head">
+            <span>Frame Notes</span>
+            <b>{activeTrack.status}</b>
+          </div>
+          <h2>{activeTrack.title}</h2>
+          <p>{activeTrack.question}</p>
+          <DetailWorkflowBoard activeTrack={activeTrack} isPrinting={isPrinting} />
         </div>
         <div className="machine-detail-copy">
           <span>{activeTrack.lane} System</span>
           <h2>{activeTrack.machine.headline}</h2>
           <p>{activeTrack.machine.thesis}</p>
-          <div className="machine-detail-grid">
+          <div className="machine-detail-grid" aria-label="Detailed workflow mapping">
             {activeTrack.machine.parts.map((part) => (
               <article key={part.id}>
                 <b>{part.code}</b>
@@ -574,5 +577,72 @@ function MachineDetailOverlay({
         </div>
       </motion.section>
     </motion.div>
+  );
+}
+
+function DetailWorkflowBoard({
+  activeTrack,
+  isPrinting,
+}: {
+  activeTrack: ResearchTrack;
+  isPrinting: boolean;
+}) {
+  const stages = [
+    { key: "input", label: "Signals", items: activeTrack.input },
+    { key: "process", label: "Work Steps", items: activeTrack.process },
+    { key: "artifact", label: "Artifacts", items: activeTrack.artifact },
+    { key: "feedback", label: "Return Loop", items: activeTrack.feedback },
+  ];
+
+  return (
+    <div className="detail-workflow-board">
+      <div className="detail-flow-rail" aria-hidden="true">
+        <motion.i
+          initial={false}
+          animate={isPrinting ? { scaleX: [0.08, 0.44, 0.78, 1] } : { scaleX: 1 }}
+          transition={{ duration: 5.2 / activeTrack.machine.tempo, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.b
+          initial={false}
+          animate={
+            isPrinting
+              ? { left: ["3%", "34%", "66%", "95%"], opacity: [0, 1, 1, 0] }
+              : { left: "95%", opacity: 0.65 }
+          }
+          transition={{ duration: 5.2 / activeTrack.machine.tempo, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+      {stages.map((stage, stageIndex) => (
+        <motion.article
+          className="detail-flow-card"
+          key={stage.key}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: stageIndex * 0.06 }}
+        >
+          <header>
+            <span>{String(stageIndex + 1).padStart(2, "0")}</span>
+            <strong>{stage.label}</strong>
+          </header>
+          <ul>
+            {stage.items.map((item, itemIndex) => (
+              <motion.li
+                key={item}
+                initial={false}
+                animate={isPrinting ? { opacity: [0.64, 1, 0.78] } : { opacity: 0.78 }}
+                transition={{
+                  duration: 3 / activeTrack.machine.tempo,
+                  delay: stageIndex * 0.24 + itemIndex * 0.1,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                {item}
+              </motion.li>
+            ))}
+          </ul>
+        </motion.article>
+      ))}
+    </div>
   );
 }

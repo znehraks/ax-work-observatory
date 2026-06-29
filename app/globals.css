@@ -1360,7 +1360,7 @@ button {
 .machine-detail {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.16fr) minmax(320px, 0.84fr);
+  grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.92fr);
   width: min(1180px, calc(100vw - 48px));
   max-height: calc(100vh - 48px);
   overflow: hidden;
@@ -1390,12 +1390,13 @@ button {
 .machine-detail-stage {
   position: relative;
   min-height: 610px;
-  overflow: hidden;
+  overflow: auto;
   border-right: 1px solid var(--hairline);
+  padding: 34px 30px 30px;
   background:
-    radial-gradient(circle at 26% 22%, color-mix(in srgb, var(--workflow-accent), transparent 58%), transparent 18rem),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.46), transparent 18%, transparent 80%, rgba(0, 0, 0, 0.44)),
-    #090907;
+    radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--workflow-accent), transparent 72%), transparent 18rem),
+    repeating-linear-gradient(0deg, rgba(17, 17, 17, 0.035) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, #f4eedf, #dfd3ba);
 }
 
 .machine-detail-stage::after {
@@ -1405,9 +1406,185 @@ button {
   pointer-events: none;
   content: "";
   background:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 5px),
-    radial-gradient(circle at 50% 40%, transparent 0 48%, rgba(255, 255, 255, 0.12) 49%, transparent 50%);
-  mix-blend-mode: screen;
+    radial-gradient(circle at 20% 24%, rgba(17, 17, 17, 0.08) 0 1px, transparent 1.5px),
+    linear-gradient(118deg, transparent 0 48%, rgba(255, 255, 255, 0.24) 49%, transparent 53%);
+  background-size: 7px 7px, auto;
+  mix-blend-mode: multiply;
+  opacity: 0.48;
+}
+
+.detail-note-head {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 3px solid rgba(17, 17, 17, 0.78);
+  padding-bottom: 8px;
+}
+
+.detail-note-head span {
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 950;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.detail-note-head b {
+  border: 1px solid rgba(17, 17, 17, 0.42);
+  padding: 5px 7px;
+  color: rgba(17, 17, 17, 0.78);
+  background: rgba(246, 240, 225, 0.72);
+  font-size: 11px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.machine-detail-stage > h2 {
+  position: relative;
+  z-index: 4;
+  margin: 18px 40px 0 0;
+  font-family: var(--serif);
+  font-size: 44px;
+  line-height: 0.96;
+}
+
+.machine-detail-stage > p {
+  position: relative;
+  z-index: 4;
+  margin: 14px 0 20px;
+  border-top: 1px solid rgba(17, 17, 17, 0.32);
+  border-bottom: 1px solid rgba(17, 17, 17, 0.32);
+  padding: 12px 0;
+  color: rgba(17, 17, 17, 0.82);
+  font-size: 16px;
+  font-weight: 780;
+  line-height: 1.58;
+  word-break: keep-all;
+}
+
+.detail-workflow-board {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  border: 1px solid rgba(17, 17, 17, 0.48);
+  padding: 30px 12px 12px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.2), transparent),
+    rgba(246, 240, 225, 0.6);
+}
+
+.detail-flow-rail {
+  position: absolute;
+  top: 15px;
+  right: 16px;
+  left: 16px;
+  height: 13px;
+}
+
+.detail-flow-rail::before {
+  position: absolute;
+  right: 0;
+  left: 0;
+  top: 6px;
+  height: 2px;
+  content: "";
+  background: repeating-linear-gradient(90deg, rgba(17, 17, 17, 0.34) 0 8px, transparent 8px 12px);
+}
+
+.detail-flow-rail i {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: color-mix(in srgb, var(--workflow-accent), var(--ink) 24%);
+  transform-origin: left;
+}
+
+.detail-flow-rail b {
+  position: absolute;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border: 1px solid rgba(17, 17, 17, 0.72);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.78), transparent 48%),
+    color-mix(in srgb, var(--workflow-accent), #f6f0e1 34%);
+}
+
+.detail-flow-card {
+  min-width: 0;
+  border: 1px solid rgba(17, 17, 17, 0.36);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.detail-flow-card header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.28);
+  padding: 8px 9px;
+}
+
+.detail-flow-card header span {
+  display: inline-grid;
+  width: 27px;
+  height: 22px;
+  place-items: center;
+  color: var(--paper);
+  background: var(--ink);
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.detail-flow-card header strong {
+  min-width: 0;
+  color: rgba(17, 17, 17, 0.86);
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1.08;
+  text-transform: uppercase;
+  white-space: normal;
+}
+
+.detail-flow-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 10px 12px;
+  list-style: none;
+}
+
+.detail-flow-card li {
+  position: relative;
+  border-top: 1px solid rgba(17, 17, 17, 0.24);
+  padding: 8px 0 0 11px;
+  color: rgba(17, 17, 17, 0.82);
+  font-size: 12px;
+  font-weight: 780;
+  line-height: 1.22;
+  word-break: keep-all;
+}
+
+.detail-flow-card li::before {
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 5px;
+  height: 5px;
+  content: "";
+  border: 1px solid rgba(17, 17, 17, 0.7);
+  background: color-mix(in srgb, var(--workflow-accent), #f6f0e1 42%);
 }
 
 .machine-detail-copy {
@@ -2023,6 +2200,10 @@ button {
     border-bottom: 1px solid var(--hairline);
   }
 
+  .detail-workflow-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .dispatch-list {
     grid-template-columns: repeat(3, 1fr);
     gap: 14px;
@@ -2253,6 +2434,20 @@ button {
 
   .machine-detail-stage {
     min-height: 350px;
+    padding: 24px 18px 22px;
+  }
+
+  .machine-detail-stage > h2 {
+    margin-right: 36px;
+    font-size: 32px;
+  }
+
+  .machine-detail-stage > p {
+    font-size: 14px;
+  }
+
+  .detail-workflow-board {
+    grid-template-columns: 1fr;
   }
 
   .machine-detail-copy {

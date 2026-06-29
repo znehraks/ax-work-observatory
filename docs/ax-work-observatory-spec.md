@@ -38,7 +38,7 @@
 
 - `app/page.tsx`: 홈 화면 진입점.
 - `components/observatory-home.tsx`: 신문 UI, dispatch 선택 상태, 중앙 도식 애니메이션, 상세 모달을 구성.
-- `components/research-machine-scene.tsx`: `Frame Notes` 상세 화면에서 사용하는 Three.js 기반 매핑 장면.
+- `components/research-machine-scene.tsx`: 이전 Three.js 기반 매핑 실험. 현재 `Frame Notes` 상세 화면은 2D 편집 노트 방식으로 렌더링한다.
 - `content/research.ts`: 모든 연구 주제와 애니메이션 문법의 원천 데이터.
 - `app/globals.css`: 신문 레이아웃, 종이 질감, dispatch 도식, 반응형 스타일.
 
@@ -79,7 +79,7 @@ intake -> context -> engine -> gate -> artifact -> feedback
 - 보드: Signals / Work Steps / Artifacts 3개 컬럼.
 - 움직임: 진행선이 차오르고, 토큰이 컬럼 사이를 이동하고, 게이트와 피드백 항목이 리듬감 있게 강조된다.
 - 라벨: 실제 프로젝트 입력/처리/산출물 텍스트를 HTML로 표시.
-- 상세: `Frame Notes`에서 Three.js 매핑과 각 파트의 설명을 제공.
+- 상세: `Frame Notes`에서 큰 질문, 네 단계 workflow board, 여섯 개 파트의 역할 매핑을 2D 편집 노트로 제공.
 
 ## 6. 연구 주제 교체 방법
 
@@ -93,7 +93,7 @@ intake -> context -> engine -> gate -> artifact -> feedback
 4. `machine.variant`, `machine.headline`, `machine.thesis`, `tempo`, `intensity`, `focus`
 5. 여섯 개의 `machine.parts`
 
-메인 카드형 도식은 `input`, `process`, `artifact`, `feedback` 배열을 바로 사용한다. 상세 매핑 화면의 3D/노드 배치를 바꾸고 싶을 때만 `machine.parts[].marker` 좌표를 조정하면 된다. 별도 애니메이션 코드를 매번 작성하지 않아도 된다.
+메인 카드형 도식은 `input`, `process`, `artifact`, `feedback` 배열을 바로 사용한다. 상세 `Frame Notes` 화면은 같은 배열과 `machine.parts`를 함께 사용해 큰 workflow board와 역할 매핑표를 만든다. 별도 애니메이션 코드를 매번 작성하지 않아도 된다.
 
 ## 7. 검증
 
