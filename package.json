@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
-    "remotion:render": "remotion render remotion/index.tsx AgenticTaskAutomationPipeline public/media/agentic-task-automation.mp4 --codec=h264 --overwrite",
+    "remotion:render": "npm run remotion:render:aidlc && npm run remotion:render:logger && npm run remotion:render:content && npm run remotion:render:task",
+    "remotion:render:aidlc": "remotion render remotion/index.tsx AIDLCStudioPipeline public/media/aidlc-studio.mp4 --codec=h264 --overwrite",
+    "remotion:render:logger": "remotion render remotion/index.tsx AgentConversationLoggerPipeline public/media/agent-conversation-logger.mp4 --codec=h264 --overwrite",
+    "remotion:render:content": "remotion render remotion/index.tsx DataToContentPipeline public/media/data-to-content-workflow.mp4 --codec=h264 --overwrite",
+    "remotion:render:task": "remotion render remotion/index.tsx AgenticTaskAutomationPipeline public/media/agentic-task-automation.mp4 --codec=h264 --overwrite",
     "remotion:preview": "remotion studio remotion/index.tsx"
   },
   "dependencies": {

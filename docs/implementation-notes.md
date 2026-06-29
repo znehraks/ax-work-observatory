@@ -21,9 +21,13 @@
 - Framer Motion으로 카드 강조, 진행선 fill, 이동 토큰, 게이트 강조, 피드백 리듬을 구현했다.
 - 프로젝트별 깊은 장치 매핑은 기존 `Frame Notes` 상세 오버레이에 유지했다.
 - 중앙 슬롯 배경을 어두운 추상 사진에서 warm paper / ink diagram 톤으로 변경했다.
-- `24/7 Agentic Task Automation`에는 Remotion으로 렌더링한 7초짜리 pipeline film을 삽입했다.
-- 이 영상은 Slack signal -> Jira triage -> Codex/OpenAI worker -> GitHub Draft PR -> CI/Human review return loop 흐름을 브랜드 심볼과 단계 라벨로 보여준다.
-- 영상 소스는 `remotion/AgenticTaskAutomationPipeline.tsx`, 출력 파일은 `public/media/agentic-task-automation.mp4`다.
+- 네 가지 dispatch 모두에 Remotion으로 렌더링한 7초짜리 pipeline film을 삽입했다.
+- `AIDLC Studio`는 prompt, project files, agent run, approval, live timeline 흐름을 보여준다.
+- `Agent Conversation Logger`는 Codex/Claude 세션, hook capture, normalize, archive 흐름을 보여준다.
+- `Data-to-Content Workflow`는 signal, collect, structure, generate, publish 흐름을 보여준다.
+- `24/7 Agentic Task Automation`은 Slack signal, Jira triage, Codex/OpenAI worker, GitHub Draft PR, CI/Human review return loop 흐름을 보여준다.
+- 공통 영상 소스는 `remotion/ResearchPipelineFilms.tsx`, task automation 전용 소스는 `remotion/AgenticTaskAutomationPipeline.tsx`다.
+- 출력 파일은 `public/media/aidlc-studio.mp4`, `public/media/agent-conversation-logger.mp4`, `public/media/data-to-content-workflow.mp4`, `public/media/agentic-task-automation.mp4`다.
 
 ## 유지보수 원칙
 

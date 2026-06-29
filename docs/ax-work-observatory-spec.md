@@ -41,10 +41,11 @@
 - `components/research-machine-scene.tsx`: 이전 Three.js 기반 매핑 실험. 현재 `Frame Notes` 상세 화면은 2D 편집 노트 방식으로 렌더링한다.
 - `content/research.ts`: 모든 연구 주제와 애니메이션 문법의 원천 데이터.
 - `app/globals.css`: 신문 레이아웃, 종이 질감, dispatch 도식, 반응형 스타일.
+- `remotion/ResearchPipelineFilms.tsx`: `AIDLC Studio`, `Agent Conversation Logger`, `Data-to-Content Workflow`용 pipeline film 소스.
 - `remotion/AgenticTaskAutomationPipeline.tsx`: `24/7 Agentic Task Automation`용 pipeline film 소스.
-- `public/media/agentic-task-automation.mp4`: Remotion으로 렌더링한 7초 MP4 자산.
+- `public/media/*.mp4`: Remotion으로 렌더링한 7초 MP4 자산.
 
-중앙 애니메이션은 `ResearchPhoto` 내부의 `DispatchFlowIllustration` 컴포넌트가 담당한다. 기본적으로 이 컴포넌트는 `activeTrack.input`, `activeTrack.process`, `activeTrack.artifact`, `activeTrack.feedback`를 직접 읽어서 카드형 workflow board를 만든다. `24/7 Agentic Task Automation`은 예외적으로 Remotion으로 렌더링한 pipeline film을 같은 슬롯에 재생한다. 메인 화면은 실제 연구 흐름을 먼저 읽히게 하고, `Frame Notes` 상세 화면에서 `machine.parts` 기반의 깊은 매핑을 확인하는 구조다.
+중앙 애니메이션은 `ResearchPhoto` 내부의 `PipelineFilm`과 `DispatchFlowIllustration`이 담당한다. 현재 네 가지 dispatch는 모두 Remotion으로 렌더링한 pipeline film을 같은 슬롯에 재생한다. 영상 자산이 없는 연구 항목은 `activeTrack.input`, `activeTrack.process`, `activeTrack.artifact`, `activeTrack.feedback`를 직접 읽는 카드형 workflow board로 fallback된다. 메인 화면은 실제 연구 흐름을 먼저 읽히게 하고, `Frame Notes` 상세 화면에서 `machine.parts` 기반의 깊은 매핑을 확인하는 구조다.
 
 ## 4. 애니메이션 문법
 
@@ -71,7 +72,33 @@ intake -> context -> engine -> gate -> artifact -> feedback
 - `Return Loop`: `activeTrack.feedback`
 - `Gate`: `machine.parts` 중 `gate`의 `mappedTo`
 
-`24/7 Agentic Task Automation` 영상은 아래 단계가 시간 순서대로 등장한다.
+각 Remotion 영상은 실제 연구 단계가 시간 순서대로 등장하도록 구성했다.
+
+`AIDLC Studio`
+
+- `Prompt`: 작업 의도와 명령 입력.
+- `Files`: 프로젝트 파일과 컨텍스트 수집.
+- `Agent Run`: 에이전트 실행과 단계 진행.
+- `Approval`: 사람이 확인하는 승인 게이트.
+- `Timeline`: 실행 로그와 리뷰 가능한 화면.
+
+`Agent Conversation Logger`
+
+- `Codex`: 세션과 도구 실행 이벤트.
+- `Claude`: 대화와 작업 맥락.
+- `Hooks`: lifecycle capture.
+- `Normalize`: 분석 가능한 이벤트 구조화.
+- `Archive`: Obsidian, JSONL, HTML viewer 저장.
+
+`Data-to-Content Workflow`
+
+- `Signals`: 저장 글, 자료, 리서치 신호.
+- `Collect`: 후보 자료 수집.
+- `Structure`: 맥락과 논점 구조화.
+- `Generate`: 콘텐츠 초안 생성.
+- `Publish`: 저장, 발송, 재사용 큐.
+
+`24/7 Agentic Task Automation`
 
 - `Slack`: 운영 신호와 런타임 상태 입력.
 - `Jira`: 이슈 분류와 범위 판단.
@@ -116,7 +143,7 @@ intake -> context -> engine -> gate -> artifact -> feedback
 - `npm run remotion:render`
 - 내장 브라우저에서 `http://localhost:3000/` 로드
 - 중앙 dispatch 도식 표시 확인
-- `24/7 Agentic Task Automation` 선택 시 `/media/agentic-task-automation.mp4`가 로드되고 1280x900, 약 7초 영상으로 재생되는지 확인
+- 네 가지 dispatch 선택 시 각 `/media/*.mp4`가 로드되고 1280x900, 약 7초 영상으로 재생되는지 확인
 - 네 가지 `Research Dispatch` 클릭 시 활성 연구가 바뀌는지 확인
 - 브라우저 warning/error 0개 확인
 

@@ -27,6 +27,31 @@ const issueCards = [
 
 const dispatchPages = ["16", "24", "32", "40"];
 
+const dispatchFilms: Record<
+  string,
+  {
+    src: string;
+    labels: string[];
+  }
+> = {
+  "aidlc-studio": {
+    src: "/media/aidlc-studio.mp4?v=20260630-research-films",
+    labels: ["Prompt", "Files", "Agent Run", "Approval", "Timeline"],
+  },
+  "agent-conversation-logger": {
+    src: "/media/agent-conversation-logger.mp4?v=20260630-research-films",
+    labels: ["Codex", "Claude", "Hooks", "Normalize", "Archive"],
+  },
+  "data-to-content-workflow": {
+    src: "/media/data-to-content-workflow.mp4?v=20260630-research-films",
+    labels: ["Signals", "Collect", "Structure", "Generate", "Publish"],
+  },
+  "agentic-task-automation": {
+    src: "/media/agentic-task-automation.mp4?v=20260630-research-films",
+    labels: ["Slack Signal", "Jira Triage", "Codex Worker", "GitHub PR"],
+  },
+};
+
 export function ObservatoryHome() {
   const [activeId, setActiveId] = useState(researchTracks[0].id);
   const [isPrinting, setIsPrinting] = useState(true);
@@ -354,8 +379,10 @@ function DispatchFlowIllustration({
   activeTrack: ResearchTrack;
   isPrinting: boolean;
 }) {
-  if (activeTrack.id === "agentic-task-automation") {
-    return <AgenticPipelineFilm isPrinting={isPrinting} />;
+  const film = dispatchFilms[activeTrack.id];
+
+  if (film) {
+    return <PipelineFilm activeTrack={activeTrack} film={film} isPrinting={isPrinting} />;
   }
 
   const tempo = activeTrack.machine.tempo;
@@ -466,7 +493,15 @@ function DispatchFlowIllustration({
   );
 }
 
-function AgenticPipelineFilm({ isPrinting }: { isPrinting: boolean }) {
+function PipelineFilm({
+  activeTrack,
+  film,
+  isPrinting,
+}: {
+  activeTrack: ResearchTrack;
+  film: (typeof dispatchFilms)[string];
+  isPrinting: boolean;
+}) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
@@ -490,19 +525,18 @@ function AgenticPipelineFilm({ isPrinting }: { isPrinting: boolean }) {
         <video
           ref={videoRef}
           className="pipeline-film-video"
-          src="/media/agentic-task-automation.mp4?v=20260630-pipeline-trace"
+          src={film.src}
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
-          aria-label="24/7 Agentic Task Automation pipeline film"
+          aria-label={`${activeTrack.title} pipeline film`}
         />
         <div className="pipeline-film-meta" aria-hidden="true">
-          <span>Slack Signal</span>
-          <span>Jira Triage</span>
-          <span>Codex Worker</span>
-          <span>GitHub PR</span>
+          {film.labels.map((label) => (
+            <span key={label}>{label}</span>
+          ))}
         </div>
       </div>
     </div>

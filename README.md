@@ -13,15 +13,18 @@ The first screen presents ongoing AX research as a moving editorial dispatch rat
 
 ## Motion System
 
-The central dispatch image uses HTML workflow cards + Framer Motion by default:
+The central dispatch image supports two readable motion layers:
 
-- workflow columns are rendered from `input`, `process`, and `artifact`
-- the return loop is rendered from `feedback`
-- a motion token moves through the active research flow
-- labels remain HTML for readability and easy replacement
-- detailed project-specific mappings live behind `Frame Notes`
+- HTML workflow cards + Framer Motion, generated from `content/research.ts`
+- rendered Remotion films for research dispatches that need a stronger timeline sequence
+- detailed project-specific mappings behind `Frame Notes`
 
-`24/7 Agentic Task Automation` additionally uses a rendered Remotion film at `public/media/agentic-task-automation.mp4`. It visualizes the Slack -> Jira -> Codex/OpenAI -> GitHub handoff as a readable pipeline.
+All four current dispatches use 7-second Remotion films in `public/media/`:
+
+- `aidlc-studio.mp4`
+- `agent-conversation-logger.mp4`
+- `data-to-content-workflow.mp4`
+- `agentic-task-automation.mp4`
 
 See `docs/ax-work-observatory-spec.md` and `docs/implementation-notes.md` for the full concept history and implementation spec.
 
