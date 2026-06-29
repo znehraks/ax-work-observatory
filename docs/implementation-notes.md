@@ -14,13 +14,12 @@
 
 ## 이번 구현 변경
 
-- 중앙 dispatch 이미지 영역을 추상 카드/선 장식에서 데이터 기반 SVG 도식으로 교체했다.
-- `DispatchFlowIllustration`, `FlowNode`, `FlowGlyph`를 추가했다.
-- 각 연구의 `machine.parts[].marker` 좌표를 사용해 노드 위치를 자동 배치한다.
-- `intake -> context -> engine -> gate -> artifact` 메인 흐름선을 그리고, `artifact -> feedback -> intake` 피드백 루프를 별도로 그린다.
-- Framer Motion으로 path drawing, node pulse, ink token movement를 구현했다.
-- 하단 HTML 라벨은 긴 프로젝트별 장치명 대신 공통 단계명으로 줄였다.
-- 프로젝트별 정확한 매핑은 기존 `Frame Notes` 상세 오버레이에 유지했다.
+- 중앙 dispatch 이미지 영역을 추상 카드/선 장식에서 실제 연구 데이터 기반 workflow board로 교체했다.
+- `DispatchFlowIllustration`, `FlowColumn`을 추가했다.
+- 각 연구의 `input`, `process`, `artifact`, `feedback` 배열을 그대로 노출해 내용 관련성을 높였다.
+- `Signals -> Work Steps -> Artifacts` 3컬럼을 기본 구조로 삼고, `Gate`와 `Return Loop`를 별도 리본으로 분리했다.
+- Framer Motion으로 카드 강조, 진행선 fill, 이동 토큰, 게이트 강조, 피드백 리듬을 구현했다.
+- 프로젝트별 깊은 장치 매핑은 기존 `Frame Notes` 상세 오버레이에 유지했다.
 - 중앙 슬롯 배경을 어두운 추상 사진에서 warm paper / ink diagram 톤으로 변경했다.
 
 ## 유지보수 원칙
@@ -30,4 +29,3 @@
 - 메인 화면의 라벨은 짧게 유지하고, 긴 설명은 상세 오버레이에서 처리한다.
 - 장식용 모션보다 workflow 이해를 돕는 모션만 추가한다.
 - 3D는 상세 설명이나 보조 장면에 제한하고, 첫 화면의 주 정보는 SVG/HTML로 유지한다.
-

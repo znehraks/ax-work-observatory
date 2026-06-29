@@ -42,11 +42,11 @@
 - `content/research.ts`: 모든 연구 주제와 애니메이션 문법의 원천 데이터.
 - `app/globals.css`: 신문 레이아웃, 종이 질감, dispatch 도식, 반응형 스타일.
 
-중앙 애니메이션은 `ResearchPhoto` 내부의 `DispatchFlowIllustration` 컴포넌트가 담당한다. 이 컴포넌트는 `activeTrack.machine.parts`를 읽어서 SVG 노드, 흐름선, 피드백 루프, 움직이는 토큰을 생성한다.
+중앙 애니메이션은 `ResearchPhoto` 내부의 `DispatchFlowIllustration` 컴포넌트가 담당한다. 이 컴포넌트는 `activeTrack.input`, `activeTrack.process`, `activeTrack.artifact`, `activeTrack.feedback`를 직접 읽어서 카드형 workflow board를 만든다. 메인 화면은 실제 연구 흐름을 먼저 읽히게 하고, `Frame Notes` 상세 화면에서 `machine.parts` 기반의 깊은 매핑을 확인하는 구조다.
 
 ## 4. 애니메이션 문법
 
-각 연구는 공통적으로 여섯 개의 파트를 가진다.
+상세 매핑에서는 각 연구가 공통적으로 여섯 개의 파트를 가진다.
 
 ```ts
 intake -> context -> engine -> gate -> artifact -> feedback
@@ -61,25 +61,24 @@ intake -> context -> engine -> gate -> artifact -> feedback
 - `role`: 해당 파트의 역할 설명.
 - `marker`: 중앙 SVG 도식에서의 좌표.
 
-메인 화면에서는 공통 단계명이 짧게 표시된다.
+메인 화면에서는 공통 파트명보다 실제 연구 데이터가 먼저 보인다.
 
-- `IN Intake`
-- `CTX Context`
-- `RUN Run`
-- `OK Gate`
-- `OUT Output`
-- `REV Return`
+- `Signals`: `activeTrack.input`
+- `Work Steps`: `activeTrack.process`
+- `Artifacts`: `activeTrack.artifact`
+- `Return Loop`: `activeTrack.feedback`
+- `Gate`: `machine.parts` 중 `gate`의 `mappedTo`
 
-정확한 프로젝트별 매핑은 `Frame Notes`를 누르면 상세 오버레이에서 확인할 수 있다. 이렇게 분리한 이유는 신문 1면의 가독성을 유지하면서도, 사용자가 원할 때 각 요소의 의미를 깊게 확인할 수 있게 하기 위해서다.
+정확한 프로젝트별 매핑과 각 장치의 역할은 `Frame Notes`를 누르면 상세 오버레이에서 확인할 수 있다. 이렇게 분리한 이유는 신문 1면의 가독성을 유지하면서도, 사용자가 원할 때 각 요소의 의미를 깊게 확인할 수 있게 하기 위해서다.
 
 ## 5. 시각 스타일
 
-중앙 dispatch 이미지는 사실적 사진이나 3D 장면이 아니라, 따뜻한 종이 위의 검은 잉크 도식처럼 보이도록 구성했다.
+중앙 dispatch 이미지는 사실적 사진이나 3D 장면이 아니라, 따뜻한 종이 위의 검은 잉크 업무 보드처럼 보이도록 구성했다.
 
 - 배경: warm off-white paper, subtle grid, halftone/noise.
-- 선: 검은 잉크와 각 연구의 accent color를 섞은 흐름선.
-- 움직임: 선이 그려지고, 토큰이 단계 사이를 이동하고, 피드백 루프가 되돌아온다.
-- 라벨: SVG 안의 코드는 짧게, 하단 HTML 라벨은 공통 단계명으로 유지.
+- 보드: Signals / Work Steps / Artifacts 3개 컬럼.
+- 움직임: 진행선이 차오르고, 토큰이 컬럼 사이를 이동하고, 게이트와 피드백 항목이 리듬감 있게 강조된다.
+- 라벨: 실제 프로젝트 입력/처리/산출물 텍스트를 HTML로 표시.
 - 상세: `Frame Notes`에서 Three.js 매핑과 각 파트의 설명을 제공.
 
 ## 6. 연구 주제 교체 방법
@@ -94,7 +93,7 @@ intake -> context -> engine -> gate -> artifact -> feedback
 4. `machine.variant`, `machine.headline`, `machine.thesis`, `tempo`, `intensity`, `focus`
 5. 여섯 개의 `machine.parts`
 
-`machine.parts`의 `marker` 좌표만 조정하면 같은 SVG 애니메이션 엔진에서 새로운 도식 배치를 만들 수 있다. 별도 애니메이션 코드를 매번 작성하지 않아도 된다.
+메인 카드형 도식은 `input`, `process`, `artifact`, `feedback` 배열을 바로 사용한다. 상세 매핑 화면의 3D/노드 배치를 바꾸고 싶을 때만 `machine.parts[].marker` 좌표를 조정하면 된다. 별도 애니메이션 코드를 매번 작성하지 않아도 된다.
 
 ## 7. 검증
 
@@ -108,4 +107,3 @@ intake -> context -> engine -> gate -> artifact -> feedback
 - 브라우저 warning/error 0개 확인
 
 모바일 레이아웃은 CSS media query로 대응되어 있으며, 현재 내장 브라우저 래퍼가 viewport 변경 API를 제공하지 않아 별도 모바일 스크린샷 자동 검증은 수행하지 않았다.
-

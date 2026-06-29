@@ -6,7 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Pause, Play, X } from "lucide-react";
 import { flowNodes, researchTracks } from "@/content/research";
 import { ResearchMachineScene } from "@/components/research-machine-scene";
-import type { MachinePart, ResearchTrack } from "@/content/research";
+import type { ResearchTrack } from "@/content/research";
 
 const issueCards = [
   {
@@ -27,22 +27,6 @@ const issueCards = [
 ];
 
 const dispatchPages = ["16", "24", "32", "40"];
-const machinePartOrder: MachinePart["id"][] = [
-  "intake",
-  "context",
-  "engine",
-  "gate",
-  "artifact",
-  "feedback",
-];
-const machinePartShortLabels: Record<MachinePart["id"], string> = {
-  intake: "Intake",
-  context: "Context",
-  engine: "Run",
-  gate: "Gate",
-  artifact: "Output",
-  feedback: "Return",
-};
 
 export function ObservatoryHome() {
   const [activeId, setActiveId] = useState(researchTracks[0].id);
@@ -371,260 +355,166 @@ function DispatchFlowIllustration({
   activeTrack: ResearchTrack;
   isPrinting: boolean;
 }) {
-  const orderedParts = machinePartOrder
-    .map((id) => activeTrack.machine.parts.find((part) => part.id === id))
-    .filter((part): part is MachinePart => Boolean(part));
-  const mainParts = orderedParts.filter((part) => part.id !== "feedback");
-  const feedbackPart = orderedParts.find((part) => part.id === "feedback");
-  const intakePart = orderedParts.find((part) => part.id === "intake");
-  const artifactPart = orderedParts.find((part) => part.id === "artifact");
-  const mainPath = buildPolylinePath(mainParts);
-  const feedbackPath =
-    feedbackPart && intakePart && artifactPart
-      ? buildFeedbackPath(artifactPart, feedbackPart, intakePart)
-      : "";
-  const mainCx = mainParts.map((part) => part.marker.x);
-  const mainCy = mainParts.map((part) => part.marker.y);
-  const feedbackCx =
-    feedbackPart && intakePart && artifactPart
-      ? [artifactPart.marker.x, feedbackPart.marker.x, intakePart.marker.x]
-      : [];
-  const feedbackCy =
-    feedbackPart && intakePart && artifactPart
-      ? [artifactPart.marker.y, feedbackPart.marker.y, intakePart.marker.y]
-      : [];
   const tempo = activeTrack.machine.tempo;
-  const gridId = `dispatch-grid-${activeTrack.id}`;
+  const gatePart = activeTrack.machine.parts.find((part) => part.id === "gate");
+  const columns = [
+    {
+      id: "signals",
+      code: "IN",
+      title: "Signals",
+      items: activeTrack.input,
+    },
+    {
+      id: "work",
+      code: "RUN",
+      title: "Work Steps",
+      items: activeTrack.process,
+    },
+    {
+      id: "proof",
+      code: "OUT",
+      title: "Artifacts",
+      items: activeTrack.artifact,
+    },
+  ];
 
   return (
     <div className="flow-illustration">
-      <svg className="flow-diagram-svg" viewBox="0 0 100 100" aria-hidden="true">
-        <defs>
-          <pattern id={gridId} width="4" height="4" patternUnits="userSpaceOnUse">
-            <path d="M 4 0 L 0 0 0 4" fill="none" stroke="rgba(17, 17, 17, 0.16)" strokeWidth="0.22" />
-          </pattern>
-        </defs>
-        <rect className="flow-paper-grid" width="100" height="100" fill={`url(#${gridId})`} />
-        <motion.path
-          className="flow-path flow-path-main"
-          d={mainPath}
-          initial={false}
-          animate={
-            isPrinting
-              ? { pathLength: [0.04, 1, 1], opacity: [0.22, 0.86, 0.55] }
-              : { pathLength: 1, opacity: 0.48 }
-          }
-          transition={{ duration: 4.8 / tempo, repeat: Infinity, ease: "easeInOut" }}
-        />
-        {feedbackPath ? (
-          <motion.path
-            className="flow-path flow-path-feedback"
-            d={feedbackPath}
+      <motion.div
+        className="flow-board"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className="flow-board-head">
+          <span>{activeTrack.lane}</span>
+          <strong>{activeTrack.machine.headline}</strong>
+        </div>
+
+        <div className="flow-stage-grid">
+          {columns.map((column, columnIndex) => (
+            <FlowColumn
+              key={column.id}
+              code={column.code}
+              title={column.title}
+              items={column.items}
+              columnIndex={columnIndex}
+              isPrinting={isPrinting}
+              tempo={tempo}
+            />
+          ))}
+        </div>
+
+        <div className="flow-motion-track" aria-hidden="true">
+          <motion.span
+            className="flow-motion-fill"
+            initial={false}
+            animate={isPrinting ? { scaleX: [0.04, 0.55, 1, 1] } : { scaleX: 1 }}
+            transition={{ duration: 4.9 / tempo, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.span
+            className="flow-motion-token"
             initial={false}
             animate={
               isPrinting
-                ? { pathLength: [0.08, 1, 1], opacity: [0.14, 0.72, 0.38] }
-                : { pathLength: 1, opacity: 0.34 }
+                ? { left: ["5%", "48%", "93%"], opacity: [0, 1, 1, 0] }
+                : { left: "93%", opacity: 0.62 }
             }
-            transition={{
-              duration: 5.6 / tempo,
-              delay: 1.3 / tempo,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
+            transition={{ duration: 4.9 / tempo, repeat: Infinity, ease: "easeInOut" }}
           />
-        ) : null}
-        {isPrinting ? (
-          <>
-            <motion.circle
-              className="flow-ink-token flow-ink-token-primary"
-              cx={mainCx[0]}
-              cy={mainCy[0]}
-              r="1.65"
-              animate={{ cx: mainCx, cy: mainCy, opacity: [0, 1, 1, 1, 0] }}
-              transition={{ duration: 4.8 / tempo, repeat: Infinity, ease: "easeInOut" }}
-            />
-            {feedbackCx.length ? (
-              <motion.circle
-                className="flow-ink-token flow-ink-token-return"
-                cx={feedbackCx[0]}
-                cy={feedbackCy[0]}
-                r="1.25"
-                animate={{ cx: feedbackCx, cy: feedbackCy, opacity: [0, 0.82, 0] }}
+        </div>
+
+        <motion.div
+          className="flow-gate"
+          initial={false}
+          animate={
+            isPrinting
+              ? { opacity: [0.72, 1, 0.76], y: [0, -2, 0] }
+              : { opacity: 0.8, y: 0 }
+          }
+          transition={{ duration: 2.6 / tempo, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <b>{gatePart?.code ?? "OK"}</b>
+          <span>{gatePart?.mappedTo ?? "Approval Gate"}</span>
+        </motion.div>
+
+        <div className="flow-feedback-band">
+          <span>Return Loop</span>
+          <div>
+            {activeTrack.feedback.map((item, index) => (
+              <motion.b
+                key={item}
+                initial={false}
+                animate={isPrinting ? { opacity: [0.48, 1, 0.58] } : { opacity: 0.7 }}
                 transition={{
-                  duration: 4.8 / tempo,
-                  delay: 2.35 / tempo,
+                  duration: 2.8 / tempo,
+                  delay: index * 0.18,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
-              />
-            ) : null}
-          </>
-        ) : null}
-        {orderedParts.map((part, index) => (
-          <FlowNode
-            key={part.id}
-            part={part}
-            index={index}
-            isFocus={part.id === activeTrack.machine.focus}
-            isPrinting={isPrinting}
-            variant={activeTrack.machine.variant}
-            tempo={tempo}
-          />
-        ))}
-      </svg>
-      <div className="flow-labels" aria-hidden="true">
-        {orderedParts.map((part) => (
-          <span key={part.id} data-focus={part.id === activeTrack.machine.focus}>
-            <b>{part.code}</b>
-            <em>{machinePartShortLabels[part.id]}</em>
-          </span>
-        ))}
-      </div>
+              >
+                {item}
+              </motion.b>
+            ))}
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
 
-function FlowNode({
-  part,
-  index,
-  isFocus,
+function FlowColumn({
+  code,
+  title,
+  items,
+  columnIndex,
   isPrinting,
-  variant,
   tempo,
 }: {
-  part: MachinePart;
-  index: number;
-  isFocus: boolean;
+  code: string;
+  title: string;
+  items: string[];
+  columnIndex: number;
   isPrinting: boolean;
-  variant: ResearchTrack["machine"]["variant"];
   tempo: number;
 }) {
   return (
-    <g className="flow-node" data-focus={isFocus} transform={`translate(${part.marker.x} ${part.marker.y})`}>
-      <motion.g
-        initial={false}
-        animate={
-          isPrinting
-            ? { scale: isFocus ? [1, 1.09, 1] : [0.98, 1.03, 0.98], opacity: [0.78, 1, 0.82] }
-            : { scale: isFocus ? 1.04 : 1, opacity: 0.88 }
-        }
-        transition={{
-          duration: 2.4 / tempo,
-          delay: index * 0.12,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      >
-        <rect className="flow-node-shell" x="-8.5" y="-6.2" width="17" height="12.4" rx="1.6" />
-        <FlowGlyph partId={part.id} variant={variant} />
-        <text className="flow-node-code" x="0" y="9.8" textAnchor="middle">
-          {part.code}
-        </text>
-      </motion.g>
-    </g>
+    <motion.section
+      className="flow-column"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: columnIndex * 0.06 }}
+    >
+      <header>
+        <b>{code}</b>
+        <span>{title}</span>
+      </header>
+      <ul>
+        {items.map((item, itemIndex) => (
+          <motion.li
+            key={item}
+            initial={false}
+            animate={
+              isPrinting
+                ? {
+                    opacity: [0.66, 1, 0.78],
+                    x: [0, 1.5, 0],
+                  }
+                : { opacity: 0.78, x: 0 }
+            }
+            transition={{
+              duration: 3.2 / tempo,
+              delay: columnIndex * 0.42 + itemIndex * 0.14,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            {item}
+          </motion.li>
+        ))}
+      </ul>
+    </motion.section>
   );
-}
-
-function FlowGlyph({
-  partId,
-  variant,
-}: {
-  partId: MachinePart["id"];
-  variant: ResearchTrack["machine"]["variant"];
-}) {
-  if (partId === "intake") {
-    return (
-      <g className="flow-glyph">
-        <path d="M -5 -2.8 H 3.8" />
-        <path d="M -4.2 0 H 5" />
-        <path d="M -5 2.8 H 1.8" />
-        <circle cx="5" cy="-2.8" r="1" />
-      </g>
-    );
-  }
-
-  if (partId === "context") {
-    return variant === "memory" ? (
-      <g className="flow-glyph">
-        <circle cx="-3" cy="0" r="2.5" />
-        <circle cx="3.3" cy="0" r="2.5" />
-        <path d="M -0.5 -3.5 V 3.5" />
-      </g>
-    ) : (
-      <g className="flow-glyph">
-        <path d="M -5 -3.2 H 5" />
-        <path d="M -5 0 H 5" />
-        <path d="M -5 3.2 H 5" />
-        <path d="M -1.8 -4.2 V 4.2" />
-        <path d="M 2.2 -4.2 V 4.2" />
-      </g>
-    );
-  }
-
-  if (partId === "engine") {
-    return (
-      <g className="flow-glyph">
-        <rect x="-5.2" y="-3.7" width="10.4" height="7.4" rx="0.9" />
-        <path d="M -3.2 -1.2 L -1 0.6 L -3.2 2.4" />
-        <path d="M 0.4 2.3 H 3.4" />
-      </g>
-    );
-  }
-
-  if (partId === "gate") {
-    return variant === "response" || variant === "memory" ? (
-      <g className="flow-glyph">
-        <rect x="-4.7" y="-0.6" width="9.4" height="5" rx="1" />
-        <path d="M -2.5 -0.6 V -2.5 C -2.5 -5 2.5 -5 2.5 -2.5 V -0.6" />
-      </g>
-    ) : (
-      <g className="flow-glyph">
-        <path d="M -5.4 -4.2 H 5.4 L 2.5 4.2 H -2.5 Z" />
-        <path d="M -2.5 0 H 2.5" />
-        <path d="M 0 -2.8 V 2.8" />
-      </g>
-    );
-  }
-
-  if (partId === "artifact") {
-    return (
-      <g className="flow-glyph">
-        <rect x="-5.1" y="-4.3" width="7.4" height="8.6" rx="0.8" />
-        <rect x="-1.8" y="-2.8" width="7.4" height="8.6" rx="0.8" />
-        <path d="M -0.4 -0.4 H 3.8" />
-        <path d="M -0.4 1.8 H 2.8" />
-      </g>
-    );
-  }
-
-  return (
-    <g className="flow-glyph">
-      <path d="M 4.2 -3.2 C -0.6 -5.8 -5.4 -2.8 -4.3 1.4" />
-      <path d="M -4.3 1.4 L -5.9 -1.4" />
-      <path d="M -4.3 1.4 L -1.2 0.8" />
-      <path d="M -1.6 3 H 4.6" />
-    </g>
-  );
-}
-
-function buildPolylinePath(parts: MachinePart[]) {
-  if (!parts.length) return "";
-  const [first, ...rest] = parts;
-  return [
-    `M ${first.marker.x} ${first.marker.y}`,
-    ...rest.map((part) => `L ${part.marker.x} ${part.marker.y}`),
-  ].join(" ");
-}
-
-function buildFeedbackPath(artifact: MachinePart, feedback: MachinePart, intake: MachinePart) {
-  return [
-    `M ${artifact.marker.x} ${artifact.marker.y}`,
-    `C ${artifact.marker.x - 3} 86 ${feedback.marker.x + 18} 88 ${feedback.marker.x} ${feedback.marker.y}`,
-    `C ${feedback.marker.x - 15} ${feedback.marker.y - 3} ${intake.marker.x - 8} ${
-      intake.marker.y + 15
-    } ${intake.marker.x} ${intake.marker.y}`,
-  ].join(" ");
 }
 
 function MachineDetailOverlay({

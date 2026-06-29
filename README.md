@@ -13,11 +13,11 @@ The first screen presents ongoing AX research as a moving editorial dispatch rat
 
 ## Motion System
 
-The central dispatch image uses SVG + Framer Motion:
+The central dispatch image uses HTML workflow cards + Framer Motion:
 
-- workflow paths are drawn from `machine.parts[].marker`
-- node glyphs map to `intake`, `context`, `engine`, `gate`, `artifact`, and `feedback`
-- ink tokens move through the active research flow
+- workflow columns are rendered from `input`, `process`, and `artifact`
+- the return loop is rendered from `feedback`
+- a motion token moves through the active research flow
 - labels remain HTML for readability and easy replacement
 - detailed project-specific mappings live behind `Frame Notes`
 
