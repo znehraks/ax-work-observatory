@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Pause, Play, X } from "lucide-react";
@@ -354,6 +354,10 @@ function DispatchFlowIllustration({
   activeTrack: ResearchTrack;
   isPrinting: boolean;
 }) {
+  if (activeTrack.id === "agentic-task-automation") {
+    return <AgenticPipelineFilm isPrinting={isPrinting} />;
+  }
+
   const tempo = activeTrack.machine.tempo;
   const gatePart = activeTrack.machine.parts.find((part) => part.id === "gate");
   const columns = [
@@ -458,6 +462,49 @@ function DispatchFlowIllustration({
           </div>
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+function AgenticPipelineFilm({ isPrinting }: { isPrinting: boolean }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    if (isPrinting) {
+      void video.play();
+      return;
+    }
+
+    video.pause();
+  }, [isPrinting]);
+
+  return (
+    <div className="flow-illustration pipeline-film-illustration">
+      <div className="pipeline-film-frame">
+        <video
+          ref={videoRef}
+          className="pipeline-film-video"
+          src="/media/agentic-task-automation.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          aria-label="24/7 Agentic Task Automation pipeline film"
+        />
+        <div className="pipeline-film-meta" aria-hidden="true">
+          <span>Slack Signal</span>
+          <span>Jira Triage</span>
+          <span>Codex Worker</span>
+          <span>GitHub PR</span>
+        </div>
+      </div>
     </div>
   );
 }

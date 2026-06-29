@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --max-warnings=0"
+    "lint": "eslint . --max-warnings=0",
+    "remotion:render": "remotion render remotion/index.tsx AgenticTaskAutomationPipeline public/media/agentic-task-automation.mp4 --codec=h264 --overwrite",
+    "remotion:preview": "remotion studio remotion/index.tsx"
   },
   "dependencies": {
     "framer-motion": "latest",
@@ -17,12 +19,16 @@
     "three": "^0.185.0"
   },
   "devDependencies": {
+    "@fortawesome/free-brands-svg-icons": "^7.3.0",
+    "@remotion/cli": "4.0.484",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "@types/three": "^0.185.0",
     "eslint": "latest",
     "eslint-config-next": "latest",
-    "typescript": "latest"
+    "remotion": "4.0.484",
+    "typescript": "latest",
+    "zod": "4.3.6"
   }
 }

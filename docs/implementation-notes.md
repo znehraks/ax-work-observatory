@@ -2,7 +2,7 @@
 
 ## 선택한 접근
 
-가장 적합한 방식은 `Imagegen 시안 + SVG/Framer Motion 애니메이션 + HTML 라벨` 하이브리드로 결정했다.
+가장 적합한 방식은 `Imagegen 시안 + SVG/Framer Motion 애니메이션 + HTML 라벨` 하이브리드로 결정했다. 다만 특정 dispatch가 더 구체적인 타임라인 영상을 필요로 할 때는 Remotion으로 짧은 MP4를 렌더링해 중앙 슬롯에 삽입한다.
 
 이유:
 
@@ -21,6 +21,9 @@
 - Framer Motion으로 카드 강조, 진행선 fill, 이동 토큰, 게이트 강조, 피드백 리듬을 구현했다.
 - 프로젝트별 깊은 장치 매핑은 기존 `Frame Notes` 상세 오버레이에 유지했다.
 - 중앙 슬롯 배경을 어두운 추상 사진에서 warm paper / ink diagram 톤으로 변경했다.
+- `24/7 Agentic Task Automation`에는 Remotion으로 렌더링한 7초짜리 pipeline film을 삽입했다.
+- 이 영상은 Slack signal -> Jira triage -> Codex/OpenAI worker -> GitHub Draft PR -> CI/Human review return loop 흐름을 브랜드 심볼과 단계 라벨로 보여준다.
+- 영상 소스는 `remotion/AgenticTaskAutomationPipeline.tsx`, 출력 파일은 `public/media/agentic-task-automation.mp4`다.
 
 ## 유지보수 원칙
 
@@ -28,4 +31,5 @@
 - SVG 도식이 깨지면 `machine.parts[].marker` 좌표를 조정한다.
 - 메인 화면의 라벨은 짧게 유지하고, 긴 설명은 상세 오버레이에서 처리한다.
 - 장식용 모션보다 workflow 이해를 돕는 모션만 추가한다.
+- Remotion 영상 자산은 `npm run remotion:render`로 재생성한다.
 - 3D는 현재 기본 설명 흐름에서 제외하고, 첫 화면과 상세 화면 모두 HTML/Framer Motion 기반의 읽히는 도식으로 유지한다.

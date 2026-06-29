@@ -41,8 +41,10 @@
 - `components/research-machine-scene.tsx`: 이전 Three.js 기반 매핑 실험. 현재 `Frame Notes` 상세 화면은 2D 편집 노트 방식으로 렌더링한다.
 - `content/research.ts`: 모든 연구 주제와 애니메이션 문법의 원천 데이터.
 - `app/globals.css`: 신문 레이아웃, 종이 질감, dispatch 도식, 반응형 스타일.
+- `remotion/AgenticTaskAutomationPipeline.tsx`: `24/7 Agentic Task Automation`용 pipeline film 소스.
+- `public/media/agentic-task-automation.mp4`: Remotion으로 렌더링한 7초 MP4 자산.
 
-중앙 애니메이션은 `ResearchPhoto` 내부의 `DispatchFlowIllustration` 컴포넌트가 담당한다. 이 컴포넌트는 `activeTrack.input`, `activeTrack.process`, `activeTrack.artifact`, `activeTrack.feedback`를 직접 읽어서 카드형 workflow board를 만든다. 메인 화면은 실제 연구 흐름을 먼저 읽히게 하고, `Frame Notes` 상세 화면에서 `machine.parts` 기반의 깊은 매핑을 확인하는 구조다.
+중앙 애니메이션은 `ResearchPhoto` 내부의 `DispatchFlowIllustration` 컴포넌트가 담당한다. 기본적으로 이 컴포넌트는 `activeTrack.input`, `activeTrack.process`, `activeTrack.artifact`, `activeTrack.feedback`를 직접 읽어서 카드형 workflow board를 만든다. `24/7 Agentic Task Automation`은 예외적으로 Remotion으로 렌더링한 pipeline film을 같은 슬롯에 재생한다. 메인 화면은 실제 연구 흐름을 먼저 읽히게 하고, `Frame Notes` 상세 화면에서 `machine.parts` 기반의 깊은 매핑을 확인하는 구조다.
 
 ## 4. 애니메이션 문법
 
@@ -68,6 +70,14 @@ intake -> context -> engine -> gate -> artifact -> feedback
 - `Artifacts`: `activeTrack.artifact`
 - `Return Loop`: `activeTrack.feedback`
 - `Gate`: `machine.parts` 중 `gate`의 `mappedTo`
+
+`24/7 Agentic Task Automation` 영상은 아래 단계가 시간 순서대로 등장한다.
+
+- `Slack`: 운영 신호와 런타임 상태 입력.
+- `Jira`: 이슈 분류와 범위 판단.
+- `Codex/OpenAI`: 계획, 승인 대기, worker 실행.
+- `GitHub`: Draft PR, 감사 노트, 상태 업데이트.
+- `Return Loop`: CI gates, completion audit, human review.
 
 정확한 프로젝트별 매핑과 각 장치의 역할은 `Frame Notes`를 누르면 상세 오버레이에서 확인할 수 있다. 이렇게 분리한 이유는 신문 1면의 가독성을 유지하면서도, 사용자가 원할 때 각 요소의 의미를 깊게 확인할 수 있게 하기 위해서다.
 
@@ -95,14 +105,18 @@ intake -> context -> engine -> gate -> artifact -> feedback
 
 메인 카드형 도식은 `input`, `process`, `artifact`, `feedback` 배열을 바로 사용한다. 상세 `Frame Notes` 화면은 같은 배열과 `machine.parts`를 함께 사용해 큰 workflow board와 역할 매핑표를 만든다. 별도 애니메이션 코드를 매번 작성하지 않아도 된다.
 
+특정 연구가 별도 Remotion 영상이 필요할 때는 `remotion/` 아래에 Composition을 추가하고 `public/media/`에 MP4로 렌더링한다. 웹 페이지에서는 `<video>`로 삽입하되, 라벨이 잘리지 않도록 `object-fit: contain`을 기본으로 둔다.
+
 ## 7. 검증
 
 현재 검증한 항목:
 
 - `npm run lint`
 - `npm run build`
+- `npm run remotion:render`
 - 내장 브라우저에서 `http://localhost:3000/` 로드
 - 중앙 dispatch 도식 표시 확인
+- `24/7 Agentic Task Automation` 선택 시 `/media/agentic-task-automation.mp4`가 로드되고 1280x900, 약 7초 영상으로 재생되는지 확인
 - 네 가지 `Research Dispatch` 클릭 시 활성 연구가 바뀌는지 확인
 - 브라우저 warning/error 0개 확인
 
