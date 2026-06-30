@@ -319,7 +319,13 @@ button {
     radial-gradient(circle at 78% 58%, rgba(255, 236, 192, 0.17), transparent 18rem),
     linear-gradient(90deg, var(--photo-edge), transparent 18%, transparent 78%, var(--photo-edge)),
     #090907;
+  cursor: pointer;
   isolation: isolate;
+}
+
+.research-photo:focus-visible {
+  outline: 2px solid var(--workflow-accent);
+  outline-offset: 3px;
 }
 
 .research-photo::before {
@@ -697,7 +703,7 @@ button {
 
 .pipeline-film-frame {
   position: absolute;
-  inset: 22px 10px 68px;
+  inset: 6px;
   z-index: 2;
   overflow: hidden;
   border: 1px solid rgba(17, 17, 17, 0.58);
@@ -738,33 +744,6 @@ button {
   object-fit: contain;
   background: #efe8d8;
   filter: saturate(0.72) contrast(1.1) sepia(0.12);
-}
-
-.pipeline-film-meta {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  left: 10px;
-  z-index: 3;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.pipeline-film-meta span {
-  min-width: 0;
-  overflow: hidden;
-  border: 1px solid rgba(17, 17, 17, 0.5);
-  padding: 5px 6px;
-  color: rgba(17, 17, 17, 0.82);
-  background: rgba(246, 240, 225, 0.82);
-  font-size: 9px;
-  font-weight: 900;
-  line-height: 1;
-  text-align: center;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
 }
 
 .photo-line,
@@ -852,24 +831,6 @@ button {
 
 .is-paused .dispatch-photo-stage[data-variant="response"] .photo-core {
   animation: none;
-}
-
-.photo-frame-note {
-  position: absolute;
-  right: 14px;
-  top: 14px;
-  bottom: auto;
-  z-index: 5;
-  border: 1px solid rgba(17, 17, 17, 0.62);
-  padding: 6px 8px;
-  color: rgba(17, 17, 17, 0.9);
-  background: rgba(246, 240, 225, 0.78);
-  font-family: var(--serif);
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 1;
-  text-transform: uppercase;
-  cursor: pointer;
 }
 
 .machine-interface {
@@ -1752,32 +1713,6 @@ button {
   line-height: 1.55;
 }
 
-.research-photo figcaption {
-  position: absolute;
-  right: 18px;
-  bottom: 16px;
-  z-index: 6;
-  max-width: 260px;
-  color: rgba(17, 17, 17, 0.9);
-  text-align: right;
-  text-shadow: 0 1px 0 rgba(246, 240, 225, 0.72);
-}
-
-.research-photo figcaption span {
-  display: block;
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.research-photo figcaption strong {
-  display: block;
-  margin-top: 4px;
-  font-family: var(--serif);
-  font-size: 22px;
-  line-height: 1.05;
-}
-
 .issue-copy {
   border-bottom: 1px dotted var(--hairline);
   padding: 16px 0 18px;
@@ -2534,14 +2469,6 @@ button {
 
   .machine-detail-grid {
     grid-template-columns: 1fr;
-  }
-
-  .research-photo figcaption {
-    max-width: 210px;
-  }
-
-  .research-photo figcaption strong {
-    font-size: 19px;
   }
 
   .issue-card-grid,

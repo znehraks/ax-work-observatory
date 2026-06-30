@@ -15,19 +15,19 @@ const dispatchFilms: Record<
   }
 > = {
   "aidlc-studio": {
-    src: "/media/aidlc-studio.mp4?v=20260701-return-path",
+    src: "/media/aidlc-studio.mp4?v=20260701-clean-focus-shifted",
     labels: ["Prompt", "Files", "Agent Run", "Approval", "Timeline"],
   },
   "agent-conversation-logger": {
-    src: "/media/agent-conversation-logger.mp4?v=20260701-return-path",
+    src: "/media/agent-conversation-logger.mp4?v=20260701-clean-focus-shifted",
     labels: ["Codex", "Claude", "Hooks", "Normalize", "Archive"],
   },
   "data-to-content-workflow": {
-    src: "/media/data-to-content-workflow.mp4?v=20260701-return-path",
+    src: "/media/data-to-content-workflow.mp4?v=20260701-clean-focus-shifted",
     labels: ["Signals", "Collect", "Structure", "Generate", "Publish"],
   },
   "agentic-task-automation": {
-    src: "/media/agentic-task-automation.mp4?v=20260701-return-path",
+    src: "/media/agentic-task-automation.mp4?v=20260701-clean-focus-shifted",
     labels: ["Slack Signal", "Jira Triage", "Codex Worker", "GitHub PR"],
   },
 };
@@ -339,6 +339,15 @@ function ResearchPhoto({
     <figure
       className="research-photo"
       aria-label={`${activeTrack.title} dispatch image concept: ${activeTrack.machine.thesis}`}
+      role="button"
+      tabIndex={0}
+      onClick={onOpenDetails}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onOpenDetails();
+        }
+      }}
       style={
         {
           "--workflow-accent": activeTrack.accent,
@@ -361,28 +370,11 @@ function ResearchPhoto({
           transition={{ duration: 0.36 }}
         >
           <DispatchFlowIllustration activeTrack={activeTrack} isPrinting={isPrinting} />
-          <button className="photo-frame-note" type="button" onClick={onOpenDetails}>
-            Frame Notes
-          </button>
         </motion.div>
       </AnimatePresence>
       <p className="sr-only">
         {activeTrack.title}: {activeTrack.machine.thesis}
       </p>
-      <figcaption>
-        <span>Current Focus</span>
-        <AnimatePresence mode="wait">
-          <motion.strong
-            key={activeTrack.title}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.24 }}
-          >
-            {activeTrack.title}
-          </motion.strong>
-        </AnimatePresence>
-      </figcaption>
     </figure>
   );
 }
@@ -548,11 +540,6 @@ function PipelineFilm({
           preload="auto"
           aria-label={`${activeTrack.title} pipeline film`}
         />
-        <div className="pipeline-film-meta" aria-hidden="true">
-          {film.labels.map((label) => (
-            <span key={label}>{label}</span>
-          ))}
-        </div>
       </div>
     </div>
   );
