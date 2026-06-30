@@ -133,6 +133,8 @@ intake -> context -> engine -> gate -> artifact -> feedback
 
 메인 카드형 도식은 `input`, `process`, `artifact`, `feedback` 배열을 바로 사용한다. 상세 `Frame Notes` 화면은 같은 배열과 `machine.parts`를 함께 사용해 큰 workflow board와 역할 매핑표를 만든다. 별도 애니메이션 코드를 매번 작성하지 않아도 된다.
 
+첫 화면의 기사 영역은 각 연구 항목의 `article` 데이터를 사용한다. `Research Dispatch`를 선택하면 Cover Story 헤드라인, 리드, `In This Dispatch` 본문, 세 개의 기사 카드가 선택된 연구 주제에 맞게 전환된다.
+
 특정 연구가 별도 Remotion 영상이 필요할 때는 `remotion/` 아래에 Composition을 추가하고 `public/media/`에 MP4로 렌더링한다. 웹 페이지에서는 `<video>`로 삽입하되, 라벨이 잘리지 않도록 `object-fit: contain`을 기본으로 둔다.
 
 ## 7. 검증

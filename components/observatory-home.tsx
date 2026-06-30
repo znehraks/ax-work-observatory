@@ -1,29 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Pause, Play, X } from "lucide-react";
 import { flowNodes, researchTracks } from "@/content/research";
 import type { ResearchTrack } from "@/content/research";
-
-const issueCards = [
-  {
-    title: "관측의 시작점",
-    page: "p. 16",
-    copy: "개발 워크플로를 브라우저 안에서 관측하고 기록하는 환경",
-  },
-  {
-    title: "기억과 대화의 로그",
-    page: "p. 24",
-    copy: "대화의 의도와 결정 흐름을 다음 실행의 자산으로 남기는 방식",
-  },
-  {
-    title: "콘텐츠로의 변환",
-    page: "p. 32",
-    copy: "데이터와 신호를 발행 가능한 지식으로 전환하는 워크플로",
-  },
-];
 
 const dispatchPages = ["16", "24", "32", "40"];
 
@@ -60,6 +42,7 @@ export function ObservatoryHome() {
   const isMotionActive = isPrinting && !prefersReducedMotion;
   const activeTrack =
     researchTracks.find((track) => track.id === activeId) ?? researchTracks[0];
+  const activeArticle = activeTrack.article;
   const expandedTrack = expandedTrackId
     ? researchTracks.find((track) => track.id === expandedTrackId)
     : null;
@@ -83,23 +66,12 @@ export function ObservatoryHome() {
             transition={{ delay: 0.1, duration: 0.55 }}
           >
             <span className="rubric">Cover Story</span>
-            <h1>
-              AX 시대,
-              <br />
-              일의 과정은
-              <br />
-              어떻게
-              <br />
-              <mark>관측되는가</mark>
-            </h1>
-            <p>
-              워크플로우의 맥락을 수집하고, 의미 있는 콘텐츠로 변환하며, 실행
-              가능한 인사이트로 연결하는 에이전틱 워크 엔진의 실험과 기록.
-            </p>
+            <ArticleHeadline lines={activeArticle.headline} />
+            <p>{activeArticle.lead}</p>
             <a className="read-link" href="#research-dispatch">
               Read the Dispatch
             </a>
-            <strong className="folio">p. 08</strong>
+            <strong className="folio">{activeArticle.cards[0]?.page ?? "p. 08"}</strong>
           </motion.section>
 
           <section className="main-story">
@@ -110,16 +82,11 @@ export function ObservatoryHome() {
               onOpenDetails={() => setExpandedTrackId(activeTrack.id)}
             />
             <div className="issue-copy">
-              <span>In This Issue</span>
-              <p>
-                AX 워크는 기술이 일을 대체하는 것이 아니라, 일의 맥락을 이해하고
-                확장하는 방식으로 진화하고 있습니다. 이번 호에서는 에이전틱 워크
-                엔진을 구성하는 네 가지 핵심 흐름과 실제 조직에서의 적용 실험을
-                기록합니다.
-              </p>
+              <span>In This Dispatch</span>
+              <p>{activeArticle.issueBody}</p>
             </div>
             <div className="issue-card-grid" id="notes">
-              {issueCards.map((card) => (
+              {activeArticle.cards.map((card) => (
                 <article key={card.title}>
                   <h2>{card.title}</h2>
                   <p>{card.copy}</p>
@@ -265,6 +232,23 @@ export function ObservatoryHome() {
         </AnimatePresence>
       </motion.article>
     </main>
+  );
+}
+
+function ArticleHeadline({ lines }: { lines: string[] }) {
+  const normalLines = lines.slice(0, -1);
+  const markedLine = lines.at(-1);
+
+  return (
+    <h1>
+      {normalLines.map((line, index) => (
+        <Fragment key={`${line}-${index}`}>
+          {line}
+          <br />
+        </Fragment>
+      ))}
+      {markedLine ? <mark>{markedLine}</mark> : null}
+    </h1>
   );
 }
 

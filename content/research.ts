@@ -20,6 +20,7 @@ export type ResearchTrack = {
   shortTitle: string;
   summary: string;
   question: string;
+  article: ResearchArticle;
   input: string[];
   process: string[];
   artifact: string[];
@@ -28,6 +29,17 @@ export type ResearchTrack = {
   accent: string;
   icon: LucideIcon;
   machine: ResearchMachine;
+};
+
+export type ResearchArticle = {
+  headline: string[];
+  lead: string;
+  issueBody: string;
+  cards: Array<{
+    title: string;
+    copy: string;
+    page: string;
+  }>;
 };
 
 export type MachineVariant = "observatory" | "memory" | "content" | "response";
@@ -63,6 +75,30 @@ export const researchTracks: ResearchTrack[] = [
     summary:
       "터미널 안에 숨어 있던 AI 개발 워크플로를 브라우저에서 관측, 승인, 협업 가능한 화면으로 바꾸는 연구.",
     question: "AI 개발 과정을 어떻게 이해 가능하고 승인 가능한 흐름으로 만들 수 있을까?",
+    article: {
+      headline: ["프롬프트는", "어떻게", "관측 가능한", "작업장이 되는가"],
+      lead:
+        "AIDLC Studio는 터미널 속 에이전트 실행을 브라우저에서 읽고 승인할 수 있는 작업장으로 옮기는 실험이다. 프롬프트, 파일, 실행 상태가 하나의 편집 가능한 흐름으로 묶인다.",
+      issueBody:
+        "이번 dispatch는 AI 개발을 단순 자동 실행이 아니라 관측 가능한 제작 과정으로 다룬다. 입력 맥락을 수집하고, 에이전트의 진행 단계를 드러내며, 사람이 승인해야 할 순간을 별도의 게이트로 분리한다.",
+      cards: [
+        {
+          title: "입력의 표면",
+          copy: "Prompt, project files, workflow state를 하나의 작업 신호로 모아 실행 전 맥락을 보이게 한다.",
+          page: "p. 16",
+        },
+        {
+          title: "승인 가능한 실행",
+          copy: "Agent execution과 phase tracking 사이에 사람이 판단할 수 있는 approval gate를 둔다.",
+          page: "p. 18",
+        },
+        {
+          title: "타임라인 산출물",
+          copy: "실행 결과를 live timeline과 stakeholder surface로 남겨 다음 리뷰가 가능한 상태로 만든다.",
+          page: "p. 20",
+        },
+      ],
+    },
     input: ["Prompt", "Project files", "Workflow state"],
     process: ["Agent execution", "Phase tracking", "Approval gate"],
     artifact: ["Live timeline", "Rendered artifacts", "Stakeholder surface"],
@@ -137,6 +173,30 @@ export const researchTracks: ResearchTrack[] = [
     summary:
       "Codex와 Claude Code의 대화, 도구 호출, 실행 흔적을 Obsidian과 분석 가능한 이벤트로 남기는 메모리 레이어.",
     question: "AI와 일한 대화를 어떻게 다음 실행을 개선하는 자산으로 바꿀 수 있을까?",
+    article: {
+      headline: ["대화는", "어떻게", "다음 실행의", "기억이 되는가"],
+      lead:
+        "Agent Conversation Logger는 Codex와 Claude Code에서 흘러가는 대화, 도구 호출, 판단 흔적을 잃어버리지 않기 위한 기억 레이어다. 대화는 기록되고, 기록은 다음 실행의 재료가 된다.",
+      issueBody:
+        "이 dispatch는 에이전트와의 협업을 일회성 채팅이 아니라 축적 가능한 작업 메모리로 바라본다. 세션을 캡처하고, 이벤트를 정규화하고, 안전하게 남길 수 있는 기록만 아카이브한다.",
+      cards: [
+        {
+          title: "세션 캡처",
+          copy: "Codex와 Claude Code의 대화, tool event, 실행 경계를 같은 관측 단위로 수집한다.",
+          page: "p. 24",
+        },
+        {
+          title: "이벤트 문법",
+          copy: "Transcript와 lifecycle hook을 JSONL로 분석 가능한 구조로 정규화한다.",
+          page: "p. 26",
+        },
+        {
+          title: "다음 실행의 기억",
+          copy: "Obsidian log, HTML viewer, next-run template로 회고와 재사용 루프를 만든다.",
+          page: "p. 28",
+        },
+      ],
+    },
     input: ["Codex sessions", "Claude Code sessions", "Tool events"],
     process: ["Lifecycle hooks", "Transcript capture", "Event normalization"],
     artifact: ["Obsidian logs", "JSONL events", "HTML viewer"],
@@ -211,6 +271,30 @@ export const researchTracks: ResearchTrack[] = [
     summary:
       "데이터 수집, 구조화, 해석, 콘텐츠 초안 생성, 저장과 발송까지 이어지는 반복 가능한 생산 파이프라인.",
     question: "수집된 신호를 어떻게 매일 발행 가능한 지식과 콘텐츠로 전환할 수 있을까?",
+    article: {
+      headline: ["신호는", "어떻게", "발행 가능한", "초안이 되는가"],
+      lead:
+        "Data-to-Content Workflow는 흩어진 리서치 신호를 수집하고 구조화해 실제로 발행 가능한 브리프와 초안으로 바꾸는 생산 파이프라인이다.",
+      issueBody:
+        "이 dispatch는 데이터 수집 그 자체보다, 수집된 신호가 어떻게 문장과 판단으로 변환되는지를 추적한다. 저장된 노트와 맥락 아카이브는 구조화 단계를 거쳐 검증 가능한 콘텐츠 초안으로 이어진다.",
+      cards: [
+        {
+          title: "신호 수집",
+          copy: "Research signals, saved notes, context archive를 발행 후보가 되는 재료로 모은다.",
+          page: "p. 32",
+        },
+        {
+          title: "의미 구조화",
+          copy: "Collect와 Structure 단계에서 자료를 논점, 근거, 재사용 가능한 맥락으로 나눈다.",
+          page: "p. 34",
+        },
+        {
+          title: "발행 대기열",
+          copy: "Research brief, article draft, Obsidian note를 검증 질문과 publishing queue로 연결한다.",
+          page: "p. 36",
+        },
+      ],
+    },
     input: ["Research signals", "Saved notes", "Context archive"],
     process: ["Collect", "Structure", "Generate"],
     artifact: ["Research brief", "Article draft", "Obsidian note"],
@@ -285,6 +369,30 @@ export const researchTracks: ResearchTrack[] = [
     summary:
       "Slack/Jira 신호를 분류하고 계획, 승인, 구현, 검증, Draft PR까지 이어주는 온콜 대응 자동화 연구.",
     question: "운영 요청을 어디까지 안전하게 자동 분류하고 실행 대기 상태로 만들 수 있을까?",
+    article: {
+      headline: ["알림은", "어떻게", "승인 가능한", "PR이 되는가"],
+      lead:
+        "24/7 Agentic Task Automation은 Slack과 Jira에서 들어오는 운영 신호를 분류하고, 승인 가능한 작업 단위로 바꾼 뒤 Draft PR까지 밀어 올리는 대응 루프다.",
+      issueBody:
+        "이 dispatch는 온콜 자동화를 즉시 실행되는 봇이 아니라, 위험도와 승인 조건을 분리하는 대응 시스템으로 다룬다. 신호는 triage되고, 작업은 계획되며, 실행은 감사 가능한 산출물로 남는다.",
+      cards: [
+        {
+          title: "신호 분류",
+          copy: "Slack signal, Jira issue, runtime health를 읽어 위험도와 작업 가능 범위를 먼저 나눈다.",
+          page: "p. 40",
+        },
+        {
+          title: "승인 잠금",
+          copy: "Plan과 approval gate를 거쳐 자동 실행 전에 사람이 판단해야 할 지점을 명확히 둔다.",
+          page: "p. 42",
+        },
+        {
+          title: "Draft PR 루프",
+          copy: "Worker run 결과를 Draft PR, audit report, status reaction으로 남겨 리뷰 가능한 상태를 만든다.",
+          page: "p. 44",
+        },
+      ],
+    },
     input: ["Slack signal", "Jira issue", "Runtime health"],
     process: ["Intake classify", "Plan", "Approval gate", "Worker run"],
     artifact: ["Draft PR", "Audit report", "Status reaction"],
