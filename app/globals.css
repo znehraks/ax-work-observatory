@@ -218,9 +218,26 @@ button {
 .front-page {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(330px, 0.85fr) minmax(420px, 1fr) minmax(320px, 0.72fr) 80px;
-  gap: 24px;
-  padding: 20px 44px 20px;
+  grid-template-columns: minmax(300px, 0.72fr) minmax(560px, 1.34fr) minmax(292px, 0.58fr) 64px;
+  gap: 22px;
+  padding: 20px 38px 20px;
+  perspective: 1600px;
+}
+
+.page-turn-sheet {
+  position: absolute;
+  inset: 12px 30px 10px;
+  z-index: 20;
+  pointer-events: none;
+  transform-origin: right center;
+  background:
+    linear-gradient(100deg, rgba(255, 255, 255, 0.28), transparent 18%),
+    repeating-linear-gradient(0deg, rgba(17, 17, 17, 0.035) 0 1px, transparent 1px 5px),
+    linear-gradient(90deg, rgba(17, 17, 17, 0.14), rgba(255, 255, 255, 0.38) 9%, rgba(246, 240, 225, 0.96) 22%, rgba(237, 229, 209, 0.96));
+  border-left: 1px solid rgba(17, 17, 17, 0.32);
+  box-shadow:
+    -18px 0 26px rgba(17, 17, 17, 0.14),
+    inset 14px 0 26px rgba(255, 255, 255, 0.34);
 }
 
 .cover-column,
@@ -285,13 +302,6 @@ button {
   font-weight: 700;
 }
 
-.folio {
-  margin-top: auto;
-  padding-top: 24px;
-  font-family: var(--serif);
-  font-size: 18px;
-}
-
 .main-story {
   display: flex;
   flex-direction: column;
@@ -300,7 +310,7 @@ button {
 .research-photo {
   --photo-edge: rgba(0, 0, 0, 0.38);
   position: relative;
-  min-height: 468px;
+  min-height: 500px;
   margin: 0;
   overflow: hidden;
   border: 1px solid #111;
@@ -687,7 +697,7 @@ button {
 
 .pipeline-film-frame {
   position: absolute;
-  inset: 26px 16px 68px;
+  inset: 22px 10px 68px;
   z-index: 2;
   overflow: hidden;
   border: 1px solid rgba(17, 17, 17, 0.58);
@@ -1773,6 +1783,10 @@ button {
   padding: 16px 0 18px;
 }
 
+.article-content {
+  transform-origin: top center;
+}
+
 .issue-copy span {
   color: var(--ink);
 }
@@ -1806,15 +1820,11 @@ button {
 }
 
 .issue-card-grid p {
-  margin: 8px 0 12px;
+  margin: 8px 0 0;
   color: var(--ink-soft);
   font-size: 14px;
   line-height: 1.6;
   word-break: keep-all;
-}
-
-.issue-card-grid strong {
-  font-family: var(--serif);
 }
 
 .dispatch-column {
@@ -1938,15 +1948,6 @@ button {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   word-break: keep-all;
-}
-
-.dispatch-body em {
-  display: block;
-  margin-top: 8px;
-  font-family: var(--serif);
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 700;
 }
 
 .editors-note {
@@ -2172,7 +2173,7 @@ button {
   }
 
   .front-page {
-    grid-template-columns: minmax(300px, 0.8fr) minmax(360px, 1fr) minmax(250px, 0.58fr);
+    grid-template-columns: minmax(280px, 0.68fr) minmax(470px, 1.2fr) minmax(238px, 0.5fr);
   }
 
   .issue-spine {
@@ -2234,10 +2235,6 @@ button {
 
   .cover-column {
     min-height: auto;
-  }
-
-  .folio {
-    margin-top: 16px;
   }
 
   .research-photo {

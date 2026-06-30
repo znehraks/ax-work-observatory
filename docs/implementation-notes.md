@@ -28,6 +28,7 @@
 - `24/7 Agentic Task Automation`은 Slack signal, Jira triage, Codex/OpenAI worker, GitHub Draft PR, CI/Human review return loop 흐름을 보여준다.
 - 각 영상의 단계 카드는 문자 약어 대신 단계 의미에 맞는 아이콘을 사용하고, `AIDLC Studio`에는 AWS 실행 환경 배지를 별도로 표시한다.
 - `Research Dispatch` 선택 시 중앙 영상뿐 아니라 Cover Story 헤드라인, 리드, `In This Dispatch` 본문, 하단 기사 카드도 해당 연구의 기사 데이터로 함께 전환된다.
+- dispatch 전환 시 페이지 번호 표기는 노출하지 않고, 신문지가 넘어가는 듯한 paper sheet 전환을 짧게 보여준다.
 - 공통 영상 소스는 `remotion/ResearchPipelineFilms.tsx`, task automation 전용 소스는 `remotion/AgenticTaskAutomationPipeline.tsx`다.
 - 출력 파일은 `public/media/aidlc-studio.mp4`, `public/media/agent-conversation-logger.mp4`, `public/media/data-to-content-workflow.mp4`, `public/media/agentic-task-automation.mp4`다.
 

@@ -38,7 +38,6 @@ export type ResearchArticle = {
   cards: Array<{
     title: string;
     copy: string;
-    page: string;
   }>;
 };
 
@@ -85,17 +84,14 @@ export const researchTracks: ResearchTrack[] = [
         {
           title: "입력의 표면",
           copy: "Prompt, project files, workflow state를 하나의 작업 신호로 모아 실행 전 맥락을 보이게 한다.",
-          page: "p. 16",
         },
         {
           title: "승인 가능한 실행",
           copy: "Agent execution과 phase tracking 사이에 사람이 판단할 수 있는 approval gate를 둔다.",
-          page: "p. 18",
         },
         {
           title: "타임라인 산출물",
           copy: "실행 결과를 live timeline과 stakeholder surface로 남겨 다음 리뷰가 가능한 상태로 만든다.",
-          page: "p. 20",
         },
       ],
     },
@@ -183,17 +179,14 @@ export const researchTracks: ResearchTrack[] = [
         {
           title: "세션 캡처",
           copy: "Codex와 Claude Code의 대화, tool event, 실행 경계를 같은 관측 단위로 수집한다.",
-          page: "p. 24",
         },
         {
           title: "이벤트 문법",
           copy: "Transcript와 lifecycle hook을 JSONL로 분석 가능한 구조로 정규화한다.",
-          page: "p. 26",
         },
         {
           title: "다음 실행의 기억",
           copy: "Obsidian log, HTML viewer, next-run template로 회고와 재사용 루프를 만든다.",
-          page: "p. 28",
         },
       ],
     },
@@ -281,17 +274,14 @@ export const researchTracks: ResearchTrack[] = [
         {
           title: "신호 수집",
           copy: "Research signals, saved notes, context archive를 발행 후보가 되는 재료로 모은다.",
-          page: "p. 32",
         },
         {
           title: "의미 구조화",
           copy: "Collect와 Structure 단계에서 자료를 논점, 근거, 재사용 가능한 맥락으로 나눈다.",
-          page: "p. 34",
         },
         {
           title: "발행 대기열",
           copy: "Research brief, article draft, Obsidian note를 검증 질문과 publishing queue로 연결한다.",
-          page: "p. 36",
         },
       ],
     },
@@ -379,17 +369,14 @@ export const researchTracks: ResearchTrack[] = [
         {
           title: "신호 분류",
           copy: "Slack signal, Jira issue, runtime health를 읽어 위험도와 작업 가능 범위를 먼저 나눈다.",
-          page: "p. 40",
         },
         {
           title: "승인 잠금",
           copy: "Plan과 approval gate를 거쳐 자동 실행 전에 사람이 판단해야 할 지점을 명확히 둔다.",
-          page: "p. 42",
         },
         {
           title: "Draft PR 루프",
           copy: "Worker run 결과를 Draft PR, audit report, status reaction으로 남겨 리뷰 가능한 상태를 만든다.",
-          page: "p. 44",
         },
       ],
     },

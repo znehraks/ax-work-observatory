@@ -7,8 +7,6 @@ import { Pause, Play, X } from "lucide-react";
 import { flowNodes, researchTracks } from "@/content/research";
 import type { ResearchTrack } from "@/content/research";
 
-const dispatchPages = ["16", "24", "32", "40"];
-
 const dispatchFilms: Record<
   string,
   {
@@ -38,6 +36,7 @@ export function ObservatoryHome() {
   const [activeId, setActiveId] = useState(researchTracks[0].id);
   const [isPrinting, setIsPrinting] = useState(true);
   const [expandedTrackId, setExpandedTrackId] = useState<string | null>(null);
+  const [turnId, setTurnId] = useState(0);
   const prefersReducedMotion = useReducedMotion();
   const isMotionActive = isPrinting && !prefersReducedMotion;
   const activeTrack =
@@ -46,6 +45,14 @@ export function ObservatoryHome() {
   const expandedTrack = expandedTrackId
     ? researchTracks.find((track) => track.id === expandedTrackId)
     : null;
+  const selectTrack = (trackId: string) => {
+    if (trackId === activeId) {
+      return;
+    }
+
+    setActiveId(trackId);
+    setTurnId((value) => value + 1);
+  };
 
   return (
     <main className="newspaper-shell">
@@ -59,11 +66,27 @@ export function ObservatoryHome() {
         <NewsWire activeTrack={activeTrack} />
 
         <section className="front-page" id="cover-story">
+          {turnId > 0 ? (
+            <motion.div
+              className="page-turn-sheet"
+              key={turnId}
+              initial={{ x: "106%", opacity: 0, rotateY: -30, skewX: -5 }}
+              animate={{
+                x: ["106%", "16%", "-106%"],
+                opacity: [0, 0.9, 0],
+                rotateY: [-30, -8, 0],
+                skewX: [-5, -1, 0],
+              }}
+              transition={{ duration: 0.78, ease: [0.22, 1, 0.36, 1] }}
+              aria-hidden="true"
+            />
+          ) : null}
           <motion.section
             className="cover-column"
+            key={`cover-${activeTrack.id}`}
             initial={{ opacity: 0, x: -18 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1, duration: 0.55 }}
+            transition={{ delay: 0.08, duration: 0.45 }}
           >
             <span className="rubric">Cover Story</span>
             <ArticleHeadline lines={activeArticle.headline} />
@@ -71,7 +94,6 @@ export function ObservatoryHome() {
             <a className="read-link" href="#research-dispatch">
               Read the Dispatch
             </a>
-            <strong className="folio">{activeArticle.cards[0]?.page ?? "p. 08"}</strong>
           </motion.section>
 
           <section className="main-story">
@@ -81,19 +103,29 @@ export function ObservatoryHome() {
               isPrinting={isMotionActive}
               onOpenDetails={() => setExpandedTrackId(activeTrack.id)}
             />
-            <div className="issue-copy">
-              <span>In This Dispatch</span>
-              <p>{activeArticle.issueBody}</p>
-            </div>
-            <div className="issue-card-grid" id="notes">
-              {activeArticle.cards.map((card) => (
-                <article key={card.title}>
-                  <h2>{card.title}</h2>
-                  <p>{card.copy}</p>
-                  <strong>{card.page}</strong>
-                </article>
-              ))}
-            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                className="article-content"
+                key={`article-${activeTrack.id}`}
+                initial={{ opacity: 0, y: 12, rotateX: -4 }}
+                animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                exit={{ opacity: 0, y: -8, rotateX: 3 }}
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="issue-copy">
+                  <span>In This Dispatch</span>
+                  <p>{activeArticle.issueBody}</p>
+                </div>
+                <div className="issue-card-grid" id="notes">
+                  {activeArticle.cards.map((card) => (
+                    <article key={card.title}>
+                      <h2>{card.title}</h2>
+                      <p>{card.copy}</p>
+                    </article>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </section>
 
           <aside className="dispatch-column" id="research-dispatch">
@@ -117,7 +149,7 @@ export function ObservatoryHome() {
                   type="button"
                   data-active={track.id === activeTrack.id}
                   data-track-id={track.id}
-                  onClick={() => setActiveId(track.id)}
+                  onClick={() => selectTrack(track.id)}
                   style={
                     {
                       "--dispatch-accent": track.accent,
@@ -132,7 +164,6 @@ export function ObservatoryHome() {
                     <b>{String(index + 1).padStart(2, "0")}</b>
                     <strong>{track.title}</strong>
                     <small>{track.summary}</small>
-                    <em>p. {dispatchPages[index] ?? String(16 + index * 8)}</em>
                   </span>
                 </button>
               ))}
@@ -496,7 +527,7 @@ function PipelineFilm({
     }
 
     if (isPrinting) {
-      void video.play();
+      void video.play().catch(() => undefined);
       return;
     }
 
