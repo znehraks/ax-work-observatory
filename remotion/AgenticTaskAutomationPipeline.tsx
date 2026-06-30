@@ -53,9 +53,9 @@ const steps = [
 ] as const;
 
 const audits = [
-  { label: "CI gates", x: 615, from: 142 },
-  { label: "Completion audit", x: 800, from: 158 },
-  { label: "Human review", x: 1000, from: 174 },
+  { label: "CI gates", x: 900, y: 576, from: 136 },
+  { label: "Completion audit", x: 670, y: 620, from: 148 },
+  { label: "Human review", x: 450, y: 576, from: 160 },
 ];
 
 type Point = {
@@ -179,7 +179,7 @@ const IconMark = ({ icon, color }: { icon: BrandIcon; color: string }) => {
   const paths = Array.isArray(pathData) ? pathData : [pathData];
 
   return (
-    <svg aria-hidden="true" viewBox={`0 0 ${width} ${height}`} style={{ width: 62, height: 62, display: "block" }}>
+    <svg aria-hidden="true" viewBox={`0 0 ${width} ${height}`} style={{ width: 68, height: 68, display: "block" }}>
       {paths.map((path, index) => (
         <path key={`${icon.iconName}-${index}`} d={path} fill={color} />
       ))}
@@ -212,7 +212,7 @@ const StepNode = ({ step, index }: { step: (typeof steps)[number]; index: number
         left: step.x,
         top: step.y,
         zIndex: 3,
-        width: 202,
+        width: 232,
         transform: `translate(-50%, -50%) translateY(${lift}px)`,
         opacity: reveal,
       }}
@@ -236,8 +236,8 @@ const StepNode = ({ step, index }: { step: (typeof steps)[number]; index: number
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "74px 1fr",
-            minHeight: 110,
+            gridTemplateColumns: "84px 1fr",
+            minHeight: 126,
           }}
         >
           <div
@@ -255,7 +255,7 @@ const StepNode = ({ step, index }: { step: (typeof steps)[number]; index: number
               <span
                 style={{
                   color: red,
-                  fontSize: 18,
+                  fontSize: 22,
                   fontWeight: 950,
                   lineHeight: 1,
                   fontFamily: "Arial Black, Helvetica, sans-serif",
@@ -266,7 +266,7 @@ const StepNode = ({ step, index }: { step: (typeof steps)[number]; index: number
               <span
                 style={{
                   color: muted,
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: 800,
                   textTransform: "uppercase",
                   lineHeight: 1,
@@ -280,7 +280,7 @@ const StepNode = ({ step, index }: { step: (typeof steps)[number]; index: number
                 display: "block",
                 marginTop: 11,
                 color: ink,
-                fontSize: 27,
+                fontSize: 33,
                 fontWeight: 950,
                 lineHeight: 0.9,
                 fontFamily: "Georgia, Times New Roman, serif",
@@ -292,7 +292,7 @@ const StepNode = ({ step, index }: { step: (typeof steps)[number]; index: number
               style={{
                 margin: "9px 0 0",
                 color: "#27231e",
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: 760,
                 lineHeight: 1.18,
               }}
@@ -341,37 +341,62 @@ const PipelineTrace = () => {
 const AuditLoop = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const rail = interpolate(frame, [136, 186], [0, 1], clamp);
-  const returnFade = interpolate(frame, [172, 198], [0, 1], clamp);
+  const rail = interpolate(frame, [128, 166], [0, 1], clamp);
+  const firstStep = steps[0];
+  const lastStep = steps[steps.length - 1];
+  const returnStartX = Math.min(1180, lastStep.x + 116);
+  const returnStartY = lastStep.y + 48;
+  const returnEndX = Math.max(54, firstStep.x - 114);
+  const returnEndY = firstStep.y + 48;
+  const returnY = 590;
+  const returnPath = [
+    `M ${returnStartX} ${returnStartY}`,
+    `C ${Math.min(1210, returnStartX + 48)} ${returnStartY + 72} ${returnStartX - 124} ${returnY} ${returnStartX - 260} ${returnY}`,
+    `H ${returnEndX + 64}`,
+    `C ${returnEndX + 18} ${returnY} ${returnEndX} ${returnEndY + 68} ${returnEndX} ${returnEndY}`,
+  ].join(" ");
 
   return (
-    <div style={{ position: "absolute", left: 236, right: 110, bottom: 96, height: 132 }}>
-      <svg viewBox="0 0 930 132" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+    <div style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+      <svg viewBox="0 0 1280 900" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+        <defs>
+          <marker id="agentic-feedback-arrow" markerHeight="18" markerUnits="userSpaceOnUse" markerWidth="18" orient="auto" refX="10" refY="5" viewBox="0 0 10 10">
+            <path d="M0 0 L10 5 L0 10 z" fill={red} />
+          </marker>
+        </defs>
         <path
-          d="M70 54 H820 Q878 54 878 92 H88 Q42 92 42 48"
+          d={returnPath}
           fill="none"
-          stroke={ink}
-          strokeWidth="4"
-          strokeDasharray={`${rail * 1180} 1180`}
+          stroke="rgba(17,17,17,0.18)"
+          strokeWidth="8"
+          strokeDasharray="12 10"
           strokeLinecap="square"
-          opacity="0.82"
         />
-        <path d="M47 46 l-22 -8 l8 22" fill="none" stroke={ink} strokeWidth="4" opacity={returnFade * 0.78} />
+        <path
+          d={returnPath}
+          fill="none"
+          markerEnd="url(#agentic-feedback-arrow)"
+          stroke={ink}
+          strokeWidth="5"
+          strokeDasharray={`${rail * 1540} 1540`}
+          strokeLinecap="square"
+          opacity="0.86"
+        />
       </svg>
       <div
         style={{
           position: "absolute",
-          left: 0,
-          top: 18,
+          left: Math.max(82, firstStep.x + 28),
+          top: returnY - 52,
           color: red,
-          fontSize: 13,
+          fontSize: 22,
           fontWeight: 950,
           textTransform: "uppercase",
         }}
       >
-        Return loop
+        Feedback path to intake
       </div>
-      {audits.map((audit, index) => {
+      {audits.map((audit) => {
         const reveal = spring({
           frame: frame - audit.from,
           fps,
@@ -384,15 +409,16 @@ const AuditLoop = () => {
             style={{
               position: "absolute",
               left: audit.x,
-              top: index === 1 ? 70 : 28,
-              minWidth: 130,
+              top: audit.y,
+              zIndex: 2,
+              minWidth: 174,
               transform: `translateX(-50%) translateY(${interpolate(reveal, [0, 1], [12, 0])}px)`,
               opacity: reveal,
               border: `1px solid ${ink}`,
               background: "rgba(247, 241, 226, 0.94)",
-              padding: "10px 12px",
+              padding: "12px 14px",
               color: ink,
-              fontSize: 15,
+              fontSize: 20,
               fontWeight: 880,
               textAlign: "center",
               boxShadow: "5px 5px 0 rgba(17, 17, 17, 0.1)",
@@ -434,7 +460,7 @@ export const AgenticTaskAutomationPipeline = () => {
           position: "absolute",
           left: 68,
           right: 68,
-          top: 58,
+          top: 52,
           display: "grid",
           gridTemplateColumns: "1fr auto",
           alignItems: "end",
@@ -444,14 +470,14 @@ export const AgenticTaskAutomationPipeline = () => {
         }}
       >
         <div>
-          <div style={{ color: red, fontSize: 18, fontWeight: 950, textTransform: "uppercase" }}>
+          <div style={{ color: red, fontSize: 22, fontWeight: 950, textTransform: "uppercase" }}>
             24/7 Agentic Task Automation
           </div>
           <h1
             style={{
               margin: "8px 0 0",
               color: ink,
-              fontSize: 58,
+              fontSize: 66,
               lineHeight: 0.96,
               fontFamily: "Georgia, Times New Roman, serif",
               fontWeight: 950,
@@ -466,10 +492,10 @@ export const AgenticTaskAutomationPipeline = () => {
             borderLeft: `3px solid ${ink}`,
             paddingLeft: 18,
             color: "#29251f",
-            fontSize: 18,
+            fontSize: 21,
             fontWeight: 820,
             lineHeight: 1.22,
-            width: 318,
+            width: 350,
           }}
         >
           Slack/Jira 신호를 분류하고, 승인 가능한 작업 단위로 바꾼 뒤 GitHub Draft PR까지 보낸다.
@@ -508,7 +534,7 @@ export const AgenticTaskAutomationPipeline = () => {
           alignItems: "center",
           gap: 12,
           color: muted,
-          fontSize: 15,
+          fontSize: 17,
           fontWeight: 820,
           textTransform: "uppercase",
         }}

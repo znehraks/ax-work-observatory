@@ -196,11 +196,11 @@ const BrandIconMark = ({ icon, color, size = 58 }: { icon: BrandIcon; color: str
 
 const StepIconMark = ({ icon, color }: { icon: StepIcon; color: string }) => {
   if (icon.kind === "brand") {
-    return <BrandIconMark icon={icon.icon} color={color} size={58} />;
+    return <BrandIconMark icon={icon.icon} color={color} size={64} />;
   }
 
   const Icon = icon.icon;
-  return <Icon aria-hidden="true" size={54} color={color} strokeWidth={2.25} />;
+  return <Icon aria-hidden="true" size={60} color={color} strokeWidth={2.35} />;
 };
 
 const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; accent: string }) => {
@@ -218,7 +218,7 @@ const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; acce
         left: step.x,
         top: step.y,
         zIndex: 3,
-        width: 212,
+        width: 224,
         transform: `translate(-50%, -50%) translateY(${lift}px)`,
         opacity: reveal,
       }}
@@ -239,7 +239,7 @@ const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; acce
           boxShadow: "0 16px 0 rgba(17, 17, 17, 0.08)",
         }}
       >
-        <div style={{ display: "grid", gridTemplateColumns: "70px 1fr", minHeight: 112 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "74px 1fr", minHeight: 122 }}>
           <div
             style={{
               display: "grid",
@@ -255,7 +255,7 @@ const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; acce
               <span
                 style={{
                   color: accent,
-                  fontSize: 18,
+                  fontSize: 21,
                   fontWeight: 950,
                   fontFamily: "Arial Black, Helvetica, sans-serif",
                   lineHeight: 1,
@@ -266,7 +266,7 @@ const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; acce
               <span
                 style={{
                   color: muted,
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: 850,
                   textAlign: "right",
                   textTransform: "uppercase",
@@ -281,7 +281,7 @@ const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; acce
                 display: "block",
                 marginTop: 10,
                 color: ink,
-                fontSize: 25,
+                fontSize: 30,
                 fontWeight: 950,
                 lineHeight: 0.95,
                 fontFamily: "Georgia, Times New Roman, serif",
@@ -289,7 +289,7 @@ const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; acce
             >
               {step.label}
             </strong>
-            <p style={{ margin: "8px 0 0", color: "#27231e", fontSize: 13, fontWeight: 760, lineHeight: 1.16 }}>
+            <p style={{ margin: "9px 0 0", color: "#27231e", fontSize: 14, fontWeight: 780, lineHeight: 1.14 }}>
               {step.detail}
             </p>
           </div>
@@ -309,7 +309,7 @@ const SideBadge = ({ badge }: { badge: FilmBadge }) => {
         left: badge.x,
         top: badge.y,
         zIndex: 2,
-        width: 192,
+        width: 212,
         transform: `translate(-50%, -50%) translateY(${interpolate(reveal, [0, 1], [18, 0])}px)`,
         opacity: reveal,
         border: `2px solid ${ink}`,
@@ -317,7 +317,7 @@ const SideBadge = ({ badge }: { badge: FilmBadge }) => {
         boxShadow: "8px 8px 0 rgba(17, 17, 17, 0.1)",
       }}
     >
-      <div style={{ display: "grid", gridTemplateColumns: "76px 1fr", minHeight: 94 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "82px 1fr", minHeight: 104 }}>
         <div
           style={{
             display: "grid",
@@ -326,14 +326,14 @@ const SideBadge = ({ badge }: { badge: FilmBadge }) => {
             background: "rgba(255, 255, 255, 0.24)",
           }}
         >
-          <BrandIconMark icon={badge.icon} color={badge.color} size={54} />
+          <BrandIconMark icon={badge.icon} color={badge.color} size={60} />
         </div>
         <div style={{ padding: "10px 10px 8px" }}>
           <span
             style={{
               display: "block",
               color: badge.color,
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: 950,
               textTransform: "uppercase",
               lineHeight: 1,
@@ -346,7 +346,7 @@ const SideBadge = ({ badge }: { badge: FilmBadge }) => {
               display: "block",
               marginTop: 8,
               color: ink,
-              fontSize: 22,
+              fontSize: 26,
               fontWeight: 950,
               lineHeight: 0.9,
               fontFamily: "Georgia, Times New Roman, serif",
@@ -354,7 +354,7 @@ const SideBadge = ({ badge }: { badge: FilmBadge }) => {
           >
             {badge.label}
           </strong>
-          <p style={{ margin: "7px 0 0", color: "#27231e", fontSize: 12, fontWeight: 760, lineHeight: 1.12 }}>
+          <p style={{ margin: "8px 0 0", color: "#27231e", fontSize: 13, fontWeight: 780, lineHeight: 1.12 }}>
             {badge.detail}
           </p>
         </div>
@@ -394,33 +394,61 @@ const PipelineTrace = ({ config, track }: { config: FilmConfig; track: ReturnTyp
 const FeedbackLoop = ({ config }: { config: FilmConfig }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const rail = interpolate(frame, [138, 188], [0, 1], clamp);
+  const rail = interpolate(frame, [128, 166], [0, 1], clamp);
+  const firstStep = config.steps[0];
+  const lastStep = config.steps[config.steps.length - 1];
+  const returnStartX = Math.min(1180, lastStep.x + 114);
+  const returnStartY = lastStep.y + 48;
+  const returnEndX = Math.max(54, firstStep.x - 112);
+  const returnEndY = firstStep.y + 48;
+  const returnY = 590;
+  const returnPath = [
+    `M ${returnStartX} ${returnStartY}`,
+    `C ${Math.min(1210, returnStartX + 48)} ${returnStartY + 72} ${returnStartX - 124} ${returnY} ${returnStartX - 260} ${returnY}`,
+    `H ${returnEndX + 64}`,
+    `C ${returnEndX + 18} ${returnY} ${returnEndX} ${returnEndY + 68} ${returnEndX} ${returnEndY}`,
+  ].join(" ");
+  const arrowId = `feedback-arrow-${config.issue}`;
 
   return (
-    <div style={{ position: "absolute", left: 210, right: 120, bottom: 96, height: 142 }}>
-      <svg viewBox="0 0 950 142" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+    <div style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+      <svg viewBox="0 0 1280 900" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+        <defs>
+          <marker id={arrowId} markerHeight="18" markerUnits="userSpaceOnUse" markerWidth="18" orient="auto" refX="10" refY="5" viewBox="0 0 10 10">
+            <path d="M0 0 L10 5 L0 10 z" fill={config.accent} />
+          </marker>
+        </defs>
         <path
-          d="M58 48 H830 Q892 48 892 94 H92 Q40 94 40 52"
+          d={returnPath}
           fill="none"
-          stroke={ink}
-          strokeWidth="4"
-          strokeDasharray={`${rail * 1190} 1190`}
+          stroke="rgba(17,17,17,0.18)"
+          strokeWidth="8"
+          strokeDasharray="12 10"
           strokeLinecap="square"
-          opacity="0.72"
+        />
+        <path
+          d={returnPath}
+          fill="none"
+          markerEnd={`url(#${arrowId})`}
+          stroke={ink}
+          strokeWidth="5"
+          strokeDasharray={`${rail * 1540} 1540`}
+          strokeLinecap="square"
+          opacity="0.82"
         />
       </svg>
       <div
         style={{
           position: "absolute",
-          left: 0,
-          top: 18,
+          left: Math.max(82, firstStep.x + 28),
+          top: returnY - 52,
           color: config.accent,
-          fontSize: 13,
+          fontSize: 22,
           fontWeight: 950,
           textTransform: "uppercase",
         }}
       >
-        Return loop
+        Feedback path to next run
       </div>
       {config.feedback.map((item) => {
         const reveal = spring({
@@ -437,14 +465,15 @@ const FeedbackLoop = ({ config }: { config: FilmConfig }) => {
               position: "absolute",
               left: item.x,
               top: item.y,
-              minWidth: 128,
+              zIndex: 2,
+              minWidth: 170,
               transform: `translateX(-50%) translateY(${interpolate(reveal, [0, 1], [12, 0])}px)`,
               opacity: reveal,
               border: `1px solid ${ink}`,
               background: "rgba(247, 241, 226, 0.94)",
-              padding: "10px 12px",
+              padding: "12px 14px",
               color: ink,
-              fontSize: 14,
+              fontSize: 20,
               fontWeight: 880,
               textAlign: "center",
               boxShadow: "5px 5px 0 rgba(17, 17, 17, 0.1)",
@@ -486,7 +515,7 @@ const ResearchPipelineFilm = ({ config }: { config: FilmConfig }) => {
           position: "absolute",
           left: 68,
           right: 68,
-          top: 58,
+          top: 52,
           display: "grid",
           gridTemplateColumns: "1fr auto",
           alignItems: "end",
@@ -496,14 +525,14 @@ const ResearchPipelineFilm = ({ config }: { config: FilmConfig }) => {
         }}
       >
         <div>
-          <div style={{ color: config.accent, fontSize: 18, fontWeight: 950, textTransform: "uppercase" }}>
+          <div style={{ color: config.accent, fontSize: 22, fontWeight: 950, textTransform: "uppercase" }}>
             {config.eyebrow}
           </div>
           <h1
             style={{
               margin: "8px 0 0",
               color: ink,
-              fontSize: 58,
+              fontSize: 66,
               lineHeight: 0.96,
               fontFamily: "Georgia, Times New Roman, serif",
               fontWeight: 950,
@@ -518,10 +547,10 @@ const ResearchPipelineFilm = ({ config }: { config: FilmConfig }) => {
             borderLeft: `3px solid ${ink}`,
             paddingLeft: 18,
             color: "#29251f",
-            fontSize: 18,
+            fontSize: 21,
             fontWeight: 820,
             lineHeight: 1.22,
-            width: 318,
+            width: 350,
           }}
         >
           {config.description}
@@ -561,7 +590,7 @@ const ResearchPipelineFilm = ({ config }: { config: FilmConfig }) => {
           alignItems: "center",
           gap: 12,
           color: muted,
-          fontSize: 15,
+          fontSize: 17,
           fontWeight: 820,
           textTransform: "uppercase",
         }}
@@ -600,7 +629,7 @@ const aidlcConfig: FilmConfig = {
       caption: "Work intake",
       detail: "Brief and intent",
       icon: { kind: "lucide", icon: MessageSquareText },
-      x: 165,
+      x: 145,
       y: 402,
       from: 10,
     },
@@ -609,7 +638,7 @@ const aidlcConfig: FilmConfig = {
       caption: "Project state",
       detail: "Repo context and diffs",
       icon: { kind: "lucide", icon: FolderGit2 },
-      x: 365,
+      x: 390,
       y: 326,
       from: 38,
     },
@@ -618,7 +647,7 @@ const aidlcConfig: FilmConfig = {
       caption: "Execution",
       detail: "Phase tracking",
       icon: { kind: "lucide", icon: Bot },
-      x: 590,
+      x: 610,
       y: 430,
       from: 72,
     },
@@ -627,25 +656,25 @@ const aidlcConfig: FilmConfig = {
       caption: "Human gate",
       detail: "Review before merge",
       icon: { kind: "lucide", icon: ShieldCheck },
-      x: 805,
+      x: 825,
       y: 330,
       from: 108,
     },
     {
       label: "Timeline",
-      caption: "Observable output",
+      caption: "Output",
       detail: "Artifacts and state",
       icon: { kind: "lucide", icon: GitBranch },
-      x: 1035,
+      x: 1060,
       y: 406,
       from: 136,
     },
   ],
   segments: [
-    { start: { x: 165, y: 402 }, controlA: { x: 260, y: 282 }, controlB: { x: 305, y: 280 }, end: { x: 365, y: 326 } },
-    { start: { x: 365, y: 326 }, controlA: { x: 450, y: 390 }, controlB: { x: 500, y: 498 }, end: { x: 590, y: 430 } },
-    { start: { x: 590, y: 430 }, controlA: { x: 680, y: 362 }, controlB: { x: 708, y: 298 }, end: { x: 805, y: 330 } },
-    { start: { x: 805, y: 330 }, controlA: { x: 890, y: 358 }, controlB: { x: 945, y: 456 }, end: { x: 1035, y: 406 } },
+    { start: { x: 145, y: 402 }, controlA: { x: 250, y: 282 }, controlB: { x: 320, y: 280 }, end: { x: 390, y: 326 } },
+    { start: { x: 390, y: 326 }, controlA: { x: 470, y: 390 }, controlB: { x: 512, y: 498 }, end: { x: 610, y: 430 } },
+    { start: { x: 610, y: 430 }, controlA: { x: 700, y: 362 }, controlB: { x: 730, y: 298 }, end: { x: 825, y: 330 } },
+    { start: { x: 825, y: 330 }, controlA: { x: 910, y: 358 }, controlB: { x: 970, y: 456 }, end: { x: 1060, y: 406 } },
   ],
   masks: [
     [0.08, 0.2],
@@ -655,9 +684,9 @@ const aidlcConfig: FilmConfig = {
     [0.87, 1],
   ],
   feedback: [
-    { label: "Comments", x: 555, y: 34, from: 144 },
-    { label: "Diff review", x: 750, y: 82, from: 160 },
-    { label: "Next run", x: 960, y: 38, from: 176 },
+    { label: "Comments", x: 930, y: 576, from: 136 },
+    { label: "Diff review", x: 700, y: 620, from: 148 },
+    { label: "Next run", x: 470, y: 576, from: 160 },
   ],
   badges: [
     {
@@ -667,7 +696,7 @@ const aidlcConfig: FilmConfig = {
       icon: faAws,
       color: "#ff9900",
       x: 1100,
-      y: 232,
+      y: 274,
       from: 56,
     },
   ],
@@ -743,9 +772,9 @@ const loggerConfig: FilmConfig = {
     [0.88, 1],
   ],
   feedback: [
-    { label: "Privacy gate", x: 560, y: 34, from: 144 },
-    { label: "Prompt coaching", x: 770, y: 82, from: 160 },
-    { label: "Next template", x: 978, y: 36, from: 176 },
+    { label: "Privacy gate", x: 900, y: 576, from: 136 },
+    { label: "Prompt coaching", x: 670, y: 620, from: 148 },
+    { label: "Next template", x: 450, y: 576, from: 160 },
   ],
 };
 
@@ -818,9 +847,9 @@ const contentConfig: FilmConfig = {
     [0.88, 1],
   ],
   feedback: [
-    { label: "Validation", x: 560, y: 34, from: 144 },
-    { label: "Reuse score", x: 770, y: 82, from: 160 },
-    { label: "Publishing queue", x: 978, y: 36, from: 176 },
+    { label: "Validation", x: 900, y: 576, from: 136 },
+    { label: "Reuse score", x: 680, y: 620, from: 148 },
+    { label: "Publishing queue", x: 460, y: 576, from: 160 },
   ],
 };
 
