@@ -81,6 +81,9 @@ type FilmConfig = {
   masks: Array<[number, number]>;
   feedback: Array<{ label: string; x: number; y: number; from: number }>;
   badges?: FilmBadge[];
+  nodeWidth?: number;
+  iconColumn?: number;
+  traceMode?: "progressive" | "full";
 };
 
 const clamp = {
@@ -153,6 +156,13 @@ const getTrackPoints = (track: ReturnType<typeof buildTrack>, progress: number) 
   return [...visibleSamples, point].map((sample) => `${sample.x.toFixed(2)},${sample.y.toFixed(2)}`).join(" ");
 };
 
+const getSegmentsPath = (segments: Segment[]) =>
+  segments
+    .map((segment, index) =>
+      `${index === 0 ? `M${segment.start.x} ${segment.start.y}` : ""} C${segment.controlA.x} ${segment.controlA.y} ${segment.controlB.x} ${segment.controlB.y} ${segment.end.x} ${segment.end.y}`,
+    )
+    .join(" ");
+
 const visibleOutsideRange = (progress: number, start: number, end: number, fade = 0.035) => {
   if (progress < start - fade || progress > end + fade) {
     return 1;
@@ -203,13 +213,26 @@ const StepIconMark = ({ icon, color }: { icon: StepIcon; color: string }) => {
   return <Icon aria-hidden="true" size={64} color={color} strokeWidth={2.4} />;
 };
 
-const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; accent: string }) => {
+const StepNode = ({
+  step,
+  index,
+  accent,
+  nodeWidth = 238,
+  iconColumn = 82,
+}: {
+  step: FilmStep;
+  index: number;
+  accent: string;
+  nodeWidth?: number;
+  iconColumn?: number;
+}) => {
   const frame = useCurrentFrame();
   const reveal = useReveal(step.from);
   const pulse = interpolate(frame, [step.from, step.from + 16, step.from + 34], [0, 1, 0.18], clamp);
   const lift = interpolate(reveal, [0, 1], [22, 0]);
   const serial = String(index + 1).padStart(2, "0");
   const iconColor = step.color ?? accent;
+  const labelSize = step.label.length >= 7 ? 23 : step.label.length >= 6 ? 28 : 34;
 
   return (
     <div
@@ -218,7 +241,7 @@ const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; acce
         left: step.x,
         top: step.y,
         zIndex: 3,
-        width: 238,
+        width: nodeWidth,
         transform: `translate(-50%, -50%) translateY(${lift}px)`,
         opacity: reveal,
       }}
@@ -239,7 +262,7 @@ const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; acce
           boxShadow: "0 16px 0 rgba(17, 17, 17, 0.08)",
         }}
       >
-        <div style={{ display: "grid", gridTemplateColumns: "82px 1fr", minHeight: 132 }}>
+        <div style={{ display: "grid", gridTemplateColumns: `${iconColumn}px 1fr`, minHeight: 132 }}>
           <div
             style={{
               display: "grid",
@@ -281,10 +304,11 @@ const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; acce
                 display: "block",
                 marginTop: 10,
                 color: ink,
-                fontSize: 34,
+                fontSize: labelSize,
                 fontWeight: 950,
                 lineHeight: 0.95,
                 fontFamily: "Georgia, Times New Roman, serif",
+                whiteSpace: step.label.includes(" ") ? "normal" : "nowrap",
               }}
             >
               {step.label}
@@ -300,7 +324,8 @@ const StepNode = ({ step, index, accent }: { step: FilmStep; index: number; acce
 };
 
 const SideBadge = ({ badge }: { badge: FilmBadge }) => {
-  const reveal = useReveal(badge.from, 20);
+  const animatedReveal = useReveal(badge.from, 20);
+  const reveal = badge.from <= 0 ? 1 : animatedReveal;
 
   return (
     <div
@@ -374,17 +399,30 @@ const PipelineTrace = ({ config, track }: { config: FilmConfig; track: ReturnTyp
   const mask = config.masks.reduce((current, [start, end]) => Math.min(current, visibleOutsideRange(progress, start, end)), 1);
   const opacity = baseOpacity * mask;
   const scale = interpolate(frame % 24, [0, 12, 24], [0.9, 1.08, 0.9]);
+  const fullTrace = config.traceMode === "full";
 
   return (
     <>
-      <polyline
-        points={getTrackPoints(track, progress)}
-        fill="none"
-        stroke={config.accent}
-        strokeWidth="8"
-        strokeLinecap="square"
-        strokeLinejoin="round"
-      />
+      {fullTrace ? (
+        <path
+          d={getSegmentsPath(config.segments)}
+          fill="none"
+          stroke={config.accent}
+          strokeWidth="8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity="0.9"
+        />
+      ) : (
+        <polyline
+          points={getTrackPoints(track, progress)}
+          fill="none"
+          stroke={config.accent}
+          strokeWidth="8"
+          strokeLinecap="square"
+          strokeLinejoin="round"
+        />
+      )}
       <circle cx={point.x} cy={point.y} r={13 * scale} fill={config.accent} stroke={ink} strokeWidth="2.5" opacity={opacity} />
       <circle cx={point.x} cy={point.y} r={20 * scale} fill="none" stroke={config.accentSoft} strokeWidth="6" opacity={opacity} />
     </>
@@ -521,21 +559,24 @@ const ResearchPipelineFilm = ({ config }: { config: FilmConfig }) => {
 
       <svg viewBox="0 0 1280 900" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
         <path
-          d={config.segments
-            .map((segment, index) =>
-              `${index === 0 ? `M${segment.start.x} ${segment.start.y}` : ""} C${segment.controlA.x} ${segment.controlA.y} ${segment.controlB.x} ${segment.controlB.y} ${segment.end.x} ${segment.end.y}`,
-            )
-            .join(" ")}
+          d={getSegmentsPath(config.segments)}
           fill="none"
           stroke="rgba(17,17,17,0.24)"
           strokeWidth="8"
-          strokeLinecap="square"
+          strokeLinecap="round"
         />
         <PipelineTrace config={config} track={track} />
       </svg>
 
       {config.steps.map((step, index) => (
-        <StepNode key={step.label} step={step} index={index} accent={config.accent} />
+        <StepNode
+          key={step.label}
+          step={step}
+          index={index}
+          accent={config.accent}
+          nodeWidth={config.nodeWidth}
+          iconColumn={config.iconColumn}
+        />
       ))}
       {config.badges?.map((badge) => (
         <SideBadge key={badge.label} badge={badge} />
@@ -553,6 +594,7 @@ const aidlcConfig: FilmConfig = {
   accent: "#a9c716",
   accentSoft: "rgba(169, 199, 22, 0.18)",
   footer: "Prompt / files / agent run / approval gate / live timeline",
+  traceMode: "full",
   steps: [
     {
       label: "Prompt",
@@ -618,6 +660,8 @@ const aidlcConfig: FilmConfig = {
     { label: "Diff review", x: 700, y: 620, from: 148 },
     { label: "Next run", x: 470, y: 576, from: 160 },
   ],
+  nodeWidth: 212,
+  iconColumn: 72,
   badges: [
     {
       label: "AWS",
@@ -625,9 +669,9 @@ const aidlcConfig: FilmConfig = {
       detail: "Cloud deploy and infra lane",
       icon: faAws,
       color: "#ff9900",
-      x: 1100,
-      y: 274,
-      from: 56,
+      x: 1080,
+      y: 762,
+      from: 0,
     },
   ],
 };

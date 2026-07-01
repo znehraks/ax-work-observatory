@@ -15,7 +15,7 @@ const dispatchFilms: Record<
   }
 > = {
   "aidlc-studio": {
-    src: "/media/aidlc-studio.mp4?v=20260701-clean-focus-shifted",
+    src: "/media/aidlc-studio.mp4?v=20260701-aidlc-line-fix",
     labels: ["Prompt", "Files", "Agent Run", "Approval", "Timeline"],
   },
   "agent-conversation-logger": {
