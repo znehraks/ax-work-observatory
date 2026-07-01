@@ -83,7 +83,7 @@ type FilmConfig = {
   badges?: FilmBadge[];
   nodeWidth?: number;
   iconColumn?: number;
-  traceMode?: "progressive" | "full";
+  traceMode?: "progressive" | "full" | "connected-loop";
 };
 
 const clamp = {
@@ -162,6 +162,64 @@ const getSegmentsPath = (segments: Segment[]) =>
       `${index === 0 ? `M${segment.start.x} ${segment.start.y}` : ""} C${segment.controlA.x} ${segment.controlA.y} ${segment.controlB.x} ${segment.controlB.y} ${segment.end.x} ${segment.end.y}`,
     )
     .join(" ");
+
+const getReturnGeometry = (config: FilmConfig) => {
+  const firstStep = config.steps[0];
+  const lastStep = config.steps[config.steps.length - 1];
+  const returnStartX = Math.min(1188, lastStep.x + 126);
+  const returnStartY = lastStep.y + 58;
+  const returnEndX = Math.max(34, firstStep.x - 126);
+  const returnEndY = firstStep.y + 58;
+  const returnY = 700;
+
+  return { firstStep, lastStep, returnStartX, returnStartY, returnEndX, returnEndY, returnY };
+};
+
+const getConnectedLoopSegments = (config: FilmConfig): Segment[] => {
+  const firstSegment = config.segments[0];
+  const lastSegment = config.segments[config.segments.length - 1];
+  const { returnStartX, returnStartY, returnEndX, returnEndY, returnY } = getReturnGeometry(config);
+  const lowerRight = { x: returnStartX - 260, y: returnY };
+  const lowerLeft = { x: returnEndX + 64, y: returnY };
+
+  return [
+    ...config.segments,
+    {
+      start: lastSegment.end,
+      controlA: { x: lastSegment.end.x + 34, y: lastSegment.end.y + 8 },
+      controlB: { x: returnStartX, y: returnStartY - 42 },
+      end: { x: returnStartX, y: returnStartY },
+    },
+    {
+      start: { x: returnStartX, y: returnStartY },
+      controlA: { x: Math.min(1210, returnStartX + 48), y: returnStartY + 72 },
+      controlB: { x: returnStartX - 124, y: returnY },
+      end: lowerRight,
+    },
+    {
+      start: lowerRight,
+      controlA: { x: returnStartX - 420, y: returnY },
+      controlB: { x: returnEndX + 220, y: returnY },
+      end: lowerLeft,
+    },
+    {
+      start: lowerLeft,
+      controlA: { x: returnEndX + 18, y: returnY },
+      controlB: { x: returnEndX, y: returnEndY + 68 },
+      end: { x: returnEndX, y: returnEndY },
+    },
+    {
+      start: { x: returnEndX, y: returnEndY },
+      controlA: { x: returnEndX, y: returnEndY - 36 },
+      controlB: { x: firstSegment.start.x - 92, y: firstSegment.start.y + 10 },
+      end: firstSegment.start,
+    },
+  ];
+};
+
+const getTraceSegments = (config: FilmConfig) => (config.traceMode === "connected-loop" ? getConnectedLoopSegments(config) : config.segments);
+
+const getConnectedLoopPath = (config: FilmConfig) => getSegmentsPath(getConnectedLoopSegments(config));
 
 const visibleOutsideRange = (progress: number, start: number, end: number, fade = 0.035) => {
   if (progress < start - fade || progress > end + fade) {
@@ -396,16 +454,18 @@ const PipelineTrace = ({ config, track }: { config: FilmConfig; track: ReturnTyp
   });
   const point = getPointOnTrack(track, progress);
   const baseOpacity = interpolate(frame, [0, 16, 150, 166], [0, 0.86, 0.86, 0], clamp);
-  const mask = config.masks.reduce((current, [start, end]) => Math.min(current, visibleOutsideRange(progress, start, end)), 1);
+  const mask =
+    config.traceMode === "connected-loop" ? 1 : config.masks.reduce((current, [start, end]) => Math.min(current, visibleOutsideRange(progress, start, end)), 1);
   const opacity = baseOpacity * mask;
   const scale = interpolate(frame % 24, [0, 12, 24], [0.9, 1.08, 0.9]);
-  const fullTrace = config.traceMode === "full";
+  const fullTrace = config.traceMode === "full" || config.traceMode === "connected-loop";
+  const tracePath = config.traceMode === "connected-loop" ? getConnectedLoopPath(config) : getSegmentsPath(config.segments);
 
   return (
     <>
       {fullTrace ? (
         <path
-          d={getSegmentsPath(config.segments)}
+          d={tracePath}
           fill="none"
           stroke={config.accent}
           strokeWidth="8"
@@ -432,13 +492,7 @@ const PipelineTrace = ({ config, track }: { config: FilmConfig; track: ReturnTyp
 const FeedbackLoop = ({ config }: { config: FilmConfig }) => {
   const frame = useCurrentFrame();
   const loopOpacity = interpolate(frame, [112, 132], [0.28, 0.82], clamp);
-  const firstStep = config.steps[0];
-  const lastStep = config.steps[config.steps.length - 1];
-  const returnStartX = Math.min(1188, lastStep.x + 126);
-  const returnStartY = lastStep.y + 58;
-  const returnEndX = Math.max(34, firstStep.x - 126);
-  const returnEndY = firstStep.y + 58;
-  const returnY = 700;
+  const { firstStep, returnStartX, returnStartY, returnEndX, returnEndY, returnY } = getReturnGeometry(config);
   const returnPath = [
     `M ${returnStartX} ${returnStartY}`,
     `C ${Math.min(1210, returnStartX + 48)} ${returnStartY + 72} ${returnStartX - 124} ${returnY} ${returnStartX - 260} ${returnY}`,
@@ -449,29 +503,31 @@ const FeedbackLoop = ({ config }: { config: FilmConfig }) => {
 
   return (
     <div style={{ position: "absolute", inset: 0, zIndex: 1 }}>
-      <svg viewBox="0 0 1280 900" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
-        <defs>
-          <marker id={arrowId} markerHeight="18" markerUnits="userSpaceOnUse" markerWidth="18" orient="auto" refX="10" refY="5" viewBox="0 0 10 10">
-            <path d="M0 0 L10 5 L0 10 z" fill={config.accent} />
-          </marker>
-        </defs>
-        <path
-          d={returnPath}
-          fill="none"
-          stroke="rgba(17,17,17,0.16)"
-          strokeWidth="9"
-          strokeLinecap="round"
-        />
-        <path
-          d={returnPath}
-          fill="none"
-          markerEnd={`url(#${arrowId})`}
-          stroke={ink}
-          strokeWidth="5.5"
-          strokeLinecap="round"
-          opacity={loopOpacity}
-        />
-      </svg>
+      {config.traceMode !== "connected-loop" ? (
+        <svg viewBox="0 0 1280 900" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+          <defs>
+            <marker id={arrowId} markerHeight="18" markerUnits="userSpaceOnUse" markerWidth="18" orient="auto" refX="10" refY="5" viewBox="0 0 10 10">
+              <path d="M0 0 L10 5 L0 10 z" fill={config.accent} />
+            </marker>
+          </defs>
+          <path
+            d={returnPath}
+            fill="none"
+            stroke="rgba(17,17,17,0.16)"
+            strokeWidth="9"
+            strokeLinecap="round"
+          />
+          <path
+            d={returnPath}
+            fill="none"
+            markerEnd={`url(#${arrowId})`}
+            stroke={ink}
+            strokeWidth="5.5"
+            strokeLinecap="round"
+            opacity={loopOpacity}
+          />
+        </svg>
+      ) : null}
       <div
         style={{
           position: "absolute",
@@ -491,7 +547,8 @@ const FeedbackLoop = ({ config }: { config: FilmConfig }) => {
 
 const ResearchPipelineFilm = ({ config }: { config: FilmConfig }) => {
   const headlineIn = useReveal(0, 22);
-  const track = buildTrack(config.segments);
+  const traceSegments = getTraceSegments(config);
+  const track = buildTrack(traceSegments);
 
   return (
     <AbsoluteFill
@@ -559,7 +616,7 @@ const ResearchPipelineFilm = ({ config }: { config: FilmConfig }) => {
 
       <svg viewBox="0 0 1280 900" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
         <path
-          d={getSegmentsPath(config.segments)}
+          d={getSegmentsPath(traceSegments)}
           fill="none"
           stroke="rgba(17,17,17,0.24)"
           strokeWidth="8"
@@ -594,7 +651,7 @@ const aidlcConfig: FilmConfig = {
   accent: "#a9c716",
   accentSoft: "rgba(169, 199, 22, 0.18)",
   footer: "Prompt / files / agent run / approval gate / live timeline",
-  traceMode: "full",
+  traceMode: "connected-loop",
   steps: [
     {
       label: "Prompt",
