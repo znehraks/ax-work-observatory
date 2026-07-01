@@ -57,12 +57,19 @@ type Point = {
   y: number;
 };
 
+type Segment = {
+  start: Point;
+  controlA: Point;
+  controlB: Point;
+  end: Point;
+};
+
 const clamp = {
   extrapolateLeft: "clamp" as const,
   extrapolateRight: "clamp" as const,
 };
 
-const pipelineSegments = [
+const pipelineSegments: Segment[] = [
   {
     start: { x: 210, y: 404 },
     controlA: { x: 300, y: 310 },
@@ -81,9 +88,72 @@ const pipelineSegments = [
     controlB: { x: 915, y: 274 },
     end: { x: 1058, y: 344 },
   },
-] as const;
+];
 
-const cubicPoint = (segment: (typeof pipelineSegments)[number], t: number): Point => {
+const getReturnGeometry = () => {
+  const firstStep = steps[0];
+  const lastStep = steps[steps.length - 1];
+  const returnStartX = Math.min(1188, lastStep.x + 132);
+  const returnStartY = lastStep.y + 58;
+  const returnEndX = Math.max(34, firstStep.x - 132);
+  const returnEndY = firstStep.y + 58;
+  const returnY = 700;
+
+  return { firstStep, returnStartX, returnStartY, returnEndX, returnEndY, returnY };
+};
+
+const getConnectedLoopSegments = (): Segment[] => {
+  const firstSegment = pipelineSegments[0];
+  const lastSegment = pipelineSegments[pipelineSegments.length - 1];
+  const { returnStartX, returnStartY, returnEndX, returnEndY, returnY } = getReturnGeometry();
+  const lowerRight = { x: returnStartX - 260, y: returnY };
+  const lowerLeft = { x: returnEndX + 64, y: returnY };
+
+  return [
+    ...pipelineSegments,
+    {
+      start: lastSegment.end,
+      controlA: { x: lastSegment.end.x + 34, y: lastSegment.end.y + 8 },
+      controlB: { x: returnStartX, y: returnStartY - 42 },
+      end: { x: returnStartX, y: returnStartY },
+    },
+    {
+      start: { x: returnStartX, y: returnStartY },
+      controlA: { x: Math.min(1210, returnStartX + 48), y: returnStartY + 72 },
+      controlB: { x: returnStartX - 124, y: returnY },
+      end: lowerRight,
+    },
+    {
+      start: lowerRight,
+      controlA: { x: returnStartX - 420, y: returnY },
+      controlB: { x: returnEndX + 220, y: returnY },
+      end: lowerLeft,
+    },
+    {
+      start: lowerLeft,
+      controlA: { x: returnEndX + 18, y: returnY },
+      controlB: { x: returnEndX, y: returnEndY + 68 },
+      end: { x: returnEndX, y: returnEndY },
+    },
+    {
+      start: { x: returnEndX, y: returnEndY },
+      controlA: { x: returnEndX, y: returnEndY - 36 },
+      controlB: { x: firstSegment.start.x - 92, y: firstSegment.start.y + 10 },
+      end: firstSegment.start,
+    },
+  ];
+};
+
+const connectedLoopSegments = getConnectedLoopSegments();
+
+const getSegmentsPath = (segments: Segment[]) =>
+  segments
+    .map((segment, index) =>
+      `${index === 0 ? `M${segment.start.x} ${segment.start.y}` : ""} C${segment.controlA.x} ${segment.controlA.y} ${segment.controlB.x} ${segment.controlB.y} ${segment.end.x} ${segment.end.y}`,
+    )
+    .join(" ");
+
+const cubicPoint = (segment: Segment, t: number): Point => {
   const inverse = 1 - t;
   const a = inverse ** 3;
   const b = 3 * inverse ** 2 * t;
@@ -101,7 +171,7 @@ const buildPipelineSamples = () => {
   let totalLength = 0;
   let previous: Point | null = null;
 
-  for (const segment of pipelineSegments) {
+  for (const segment of connectedLoopSegments) {
     for (let index = 0; index <= 160; index += 1) {
       if (samples.length > 0 && index === 0) {
         continue;
@@ -148,22 +218,6 @@ const getPipelinePoints = (progress: number) => {
   const point = getPointOnPipeline(progress);
 
   return [...visibleSamples, point].map((sample) => `${sample.x.toFixed(2)},${sample.y.toFixed(2)}`).join(" ");
-};
-
-const visibleOutsideRange = (progress: number, start: number, end: number, fade = 0.035) => {
-  if (progress < start - fade || progress > end + fade) {
-    return 1;
-  }
-
-  if (progress < start) {
-    return Math.max(0, Math.min(1, (start - progress) / fade));
-  }
-
-  if (progress > end) {
-    return Math.max(0, Math.min(1, (progress - end) / fade));
-  }
-
-  return 0;
 };
 
 type BrandIcon = (typeof steps)[number]["icon"];
@@ -308,12 +362,7 @@ const PipelineTrace = () => {
   });
   const point = getPointOnPipeline(lineProgress);
   const baseOpacity = interpolate(frame, [0, 16, 150, 166], [0, 0.86, 0.86, 0], clamp);
-  const cardMask = Math.min(
-    visibleOutsideRange(lineProgress, 0.14, 0.32),
-    visibleOutsideRange(lineProgress, 0.5, 0.68),
-    visibleOutsideRange(lineProgress, 0.82, 0.98),
-  );
-  const opacity = baseOpacity * cardMask;
+  const opacity = baseOpacity;
   const scale = interpolate(frame % 24, [0, 12, 24], [0.9, 1.08, 0.9]);
 
   return (
@@ -323,7 +372,7 @@ const PipelineTrace = () => {
         fill="none"
         stroke={red}
         strokeWidth="8"
-        strokeLinecap="square"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
       <circle cx={point.x} cy={point.y} r={13 * scale} fill={red} stroke={ink} strokeWidth="2.5" opacity={opacity} />
@@ -333,47 +382,10 @@ const PipelineTrace = () => {
 };
 
 const AuditLoop = () => {
-  const frame = useCurrentFrame();
-  const loopOpacity = interpolate(frame, [112, 132], [0.28, 0.86], clamp);
-  const firstStep = steps[0];
-  const lastStep = steps[steps.length - 1];
-  const returnStartX = Math.min(1188, lastStep.x + 132);
-  const returnStartY = lastStep.y + 58;
-  const returnEndX = Math.max(34, firstStep.x - 132);
-  const returnEndY = firstStep.y + 58;
-  const returnY = 700;
-  const returnPath = [
-    `M ${returnStartX} ${returnStartY}`,
-    `C ${Math.min(1210, returnStartX + 48)} ${returnStartY + 72} ${returnStartX - 124} ${returnY} ${returnStartX - 260} ${returnY}`,
-    `H ${returnEndX + 64}`,
-    `C ${returnEndX + 18} ${returnY} ${returnEndX} ${returnEndY + 68} ${returnEndX} ${returnEndY}`,
-  ].join(" ");
+  const { firstStep, returnY } = getReturnGeometry();
 
   return (
     <div style={{ position: "absolute", inset: 0, zIndex: 1 }}>
-      <svg viewBox="0 0 1280 900" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
-        <defs>
-          <marker id="agentic-feedback-arrow" markerHeight="18" markerUnits="userSpaceOnUse" markerWidth="18" orient="auto" refX="10" refY="5" viewBox="0 0 10 10">
-            <path d="M0 0 L10 5 L0 10 z" fill={red} />
-          </marker>
-        </defs>
-        <path
-          d={returnPath}
-          fill="none"
-          stroke="rgba(17,17,17,0.16)"
-          strokeWidth="9"
-          strokeLinecap="round"
-        />
-        <path
-          d={returnPath}
-          fill="none"
-          markerEnd="url(#agentic-feedback-arrow)"
-          stroke={ink}
-          strokeWidth="5.5"
-          strokeLinecap="round"
-          opacity={loopOpacity}
-        />
-      </svg>
       <div
         style={{
           position: "absolute",
@@ -461,11 +473,12 @@ export const AgenticTaskAutomationPipeline = () => {
 
       <svg viewBox="0 0 1280 900" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
         <path
-          d="M210 404 C300 310 375 303 465 332 S625 502 730 418 S915 274 1058 344"
+          d={getSegmentsPath(connectedLoopSegments)}
           fill="none"
           stroke="rgba(17,17,17,0.24)"
           strokeWidth="8"
-          strokeLinecap="square"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <PipelineTrace />
       </svg>

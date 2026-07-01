@@ -19,15 +19,15 @@ const dispatchFilms: Record<
     labels: ["Prompt", "Files", "Agent Run", "Approval", "Timeline"],
   },
   "agent-conversation-logger": {
-    src: "/media/agent-conversation-logger.mp4?v=20260701-clean-focus-shifted",
+    src: "/media/agent-conversation-logger.mp4?v=20260701-connected-loop",
     labels: ["Codex", "Claude", "Hooks", "Normalize", "Archive"],
   },
   "data-to-content-workflow": {
-    src: "/media/data-to-content-workflow.mp4?v=20260701-clean-focus-shifted",
+    src: "/media/data-to-content-workflow.mp4?v=20260701-connected-loop",
     labels: ["Signals", "Collect", "Structure", "Generate", "Publish"],
   },
   "agentic-task-automation": {
-    src: "/media/agentic-task-automation.mp4?v=20260701-clean-focus-shifted",
+    src: "/media/agentic-task-automation.mp4?v=20260701-connected-loop",
     labels: ["Slack Signal", "Jira Triage", "Codex Worker", "GitHub PR"],
   },
 };

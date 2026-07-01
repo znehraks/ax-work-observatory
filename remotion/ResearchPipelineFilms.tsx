@@ -741,6 +741,7 @@ const loggerConfig: FilmConfig = {
   accent: "#176e82",
   accentSoft: "rgba(23, 110, 130, 0.18)",
   footer: "Sessions / hooks / normalize / privacy gate / archive",
+  traceMode: "connected-loop",
   steps: [
     {
       label: "Codex",
@@ -817,6 +818,7 @@ const contentConfig: FilmConfig = {
   accent: "#c88b14",
   accentSoft: "rgba(200, 139, 20, 0.2)",
   footer: "Signals / collect / structure / generate / publish queue",
+  traceMode: "connected-loop",
   steps: [
     {
       label: "Signals",
